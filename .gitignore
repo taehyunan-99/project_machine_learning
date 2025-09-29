@@ -8,3 +8,17 @@ __pycache__/
 data/
 datasets/
 images/
+# === local data & outputs ===
+datasets/
+data/
+images/
+runs/
+weights/
+*.pt
+*.onnx
+*.ckpt
+
+# === mac & python junk ===
+.DS_Store
+__pycache__/
+.ipynb_checkpoints/
