@@ -27,9 +27,9 @@ transform = transforms.Compose([
 # 데이터 로더 생성 함수 (학습 시에만 호출)
 def create_data_loaders():
     # 데이터 불러오기
-    train_dataset = datasets.ImageFolder("dataset/data/train", transform=transform)
-    test_dataset = datasets.ImageFolder("dataset/data/test", transform=transform)
-    valid_dataset = datasets.ImageFolder("dataset/data/valid", transform=transform)
+    train_dataset = datasets.ImageFolder("datasets/train", transform=transform)
+    test_dataset = datasets.ImageFolder("datasets/test", transform=transform)
+    valid_dataset = datasets.ImageFolder("datasets/valid", transform=transform)
 
     # 배치 사이즈 설정
     batch_size = 32
@@ -58,14 +58,14 @@ def create_data_loaders():
 
 # 사용가능한 디바이스 확인
 if torch.cuda.is_available():
-    device = torch.device('cuda')
+    device = torch.device("cuda")
     print("CUDA GPU 사용")
     print(f"GPU 이름: {torch.cuda.get_device_name(0)}")
 elif torch.backends.mps.is_available():
-    device = torch.device('mps')
+    device = torch.device("mps")
     print("Apple MPS (Metal Performance Shaders) 사용")
 else:
-    device = torch.device('cpu')
+    device = torch.device("cpu")
     print("CPU 사용")
 
 print(f"선택된 디바이스: {device}")
@@ -131,15 +131,20 @@ def valid_loop(data_loader, model, criterion):
     print(f"Validation Results: Accuracy: {accuracy:.3f} ({100*accuracy:.1f}%), Avg loss: {avg_loss:.4f}")
     return avg_loss, accuracy
 
+# 학습 반복 수
+epochs = 5
+
 # 학습 실행
-# epochs = 5 # 반복 학습
+if __name__ == "__main__":
+    # 데이터 로더 생성
+    train_loader, test_loader, valid_loader = create_data_loaders()
 
-# for epoch in range(epochs):
-#     print(f"\n[Epoch] {epoch+1} / {epochs}")
-#     train_loss = train_loop(train_loader, model, criterion, optimizer)
-#     valid_loss, valid_acc = valid_loop(valid_loader, model, criterion)
+    for epoch in range(epochs):
+        print(f"\n[Epoch] {epoch+1} / {epochs}")
+        train_loss = train_loop(train_loader, model, criterion, optimizer)
+        valid_loss, valid_acc = valid_loop(valid_loader, model, criterion)
+    print("\n학습 및 검증 완료!")
 
-# print("\n학습 및 검증 완료!")
-
-# torch.save(model.state_dict(), "test_model.pth")
-# print("\n모델 저장 완료!")
+    # 모델 저장
+    torch.save(model.state_dict(), "prototype_model_v1.pth")
+    print("\n모델 저장 완료!")

@@ -1,10 +1,32 @@
 # YOLO + ResNet Model 파이프라인
 
-from model import model, transform
+from model import transform
 from yolo_detector import YOLODetector
 import cv2 as cv
 import torch
+import torchvision.models as models
+import torch.nn as nn
 from PIL import Image
+
+# 학습이 완료된 모델 가져오기
+model_path = "../backend/models/prototype_model_v1.pth"
+def load_trained_model(model_path=model_path):
+    # 모델 구조
+    model = models.resnet18(pretrained=False)
+    model.fc = nn.Linear(512, 6)
+    # 학습시킨 가중치 업데이트
+    model.load_state_dict(torch.load(model_path, map_location="cpu"))
+    model.eval() # 검증 모드
+    # 디바이스 설정
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+    # 모델을 디바이스로 이동
+    model = model.to(device)
+    return model
 
 class YOLOResNetPipeline:
     # 재활용 분류 매핑 (알파벳 순서: Can, Glass, Paper, Plastic, Styrofoam, Vinyl)
@@ -22,7 +44,7 @@ class YOLOResNetPipeline:
         # YOLO 초기화
         self.yolo = YOLODetector()
         # ResNet 모델 초기화
-        self.resnet = model
+        self.resnet = load_trained_model()
         self.transform = transform
 
     # 객체 처리 함수
@@ -84,7 +106,10 @@ class YOLOResNetPipeline:
     
     # API용 정보 응답 함수
     def format_recycling_response(self, yolo_results, img_path=""):
+        # ResNet 분류 결과를 담을 리스트 생성
         recycling_items = []
+        # 분류에 실패한 객체를 담을 리스트(피드백 및 DB용)
+        unclassified_items = []
         for idx, object in enumerate(yolo_results):
             # ResNet 분류 결과가 있는 경우에만 처리
             if "resnet_class" in object:
@@ -103,15 +128,67 @@ class YOLOResNetPipeline:
                     }
                 }
                 recycling_items.append(item)
-        return {
+            # 분류 실패시 피드백 요청
+            else:
+                unclassified_item = {
+                    "item_id": idx + 1,
+                    "location": {
+                        "bbox": object["bbox"],
+                        "confidence": object["confidence"]
+                    },
+                    "status": "classification_failed",
+                    "feedback_request": {
+                        "message": "이 객체의 재활용 분류를 도와주세요!",
+                        "options": ["캔", "유리", "종이", "플라스틱", "스티로폼", "비닐"]
+                    }
+                }
+                unclassified_items.append(unclassified_item)
+
+        # API 응답 구성
+        response = {
             "status": "success",
-            "total_items": len(recycling_items),
-            "recycling_items": recycling_items,
-            "summary": f"총 {len(recycling_items)}개의 재활용품이 발견되었습니다!👀"
+            "total_items": len(recycling_items) + len(unclassified_items),
+            "classified_items": len(recycling_items),
+            "unclassified_items": len(unclassified_items),
+            "recycling_items": recycling_items
         }
-    
-# 테스트 실행
+        if unclassified_items:
+            response["feedback_needed"] = unclassified_items
+            response["summary"] = f"총 {len(recycling_items)}개 분류 완료, {len(unclassified_items)}개 항목의 사용자 피드백 필요"
+        else:
+            response["summary"] = f"총 {len(recycling_items)}개의 재활용품이 모두 분류되었습니다!"
+        return response
+
+# =============테스트 실행=============
 if __name__ == "__main__":
     pipeline = YOLOResNetPipeline()
-    results = pipeline.process_object("datasets/p6.jpg")
-    print(f"\n최종 결과: {len(results)}개 객체 검출됨")
+    # 테스트할 이미지 파일들
+    test_images = [
+        "datasets/pipe_test/test1.jpg",
+        "datasets/pipe_test/test2.jpg",
+        "datasets/pipe_test/test3.jpg",
+        "datasets/pipe_test/test4.jpg",
+        "datasets/pipe_test/test5.jpg"
+    ]
+    print("YOLO + ResNet 파이프라인 종합 테스트 시작")
+
+    for idx, img_path in enumerate(test_images):
+        print(f"\n테스트 {idx+1}/5: {img_path}")
+        # 파이프라인 실행
+        results = pipeline.process_object(img_path)
+        # API 응답 생성
+        api_response = pipeline.format_recycling_response(results, img_path)
+        # 결과 요약 출력
+        print(f"\n결과 요약:")
+        print(f"   • YOLO 탐지: {len(results)}개 객체")
+        print(f"   • 분류 완료: {api_response["classified_items"]}개")
+        print(f"   • 미분류: {api_response["unclassified_items"]}개")
+        print(f"   • 요약: {api_response["summary"]}")
+        # 상세 분류 결과
+        if api_response["recycling_items"]:
+            print(f"\n분류 결과:")
+            for item in api_response["recycling_items"]:
+                category = item["recycling_info"]["category"]
+                confidence = item["recycling_info"]["confidence"]
+                print(f"   • 객체 {item["item_id"]}: {category} (신뢰도: {confidence:.3f})")
+    print("\n전체 테스트 완료!")
