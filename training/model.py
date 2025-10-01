@@ -7,9 +7,12 @@ import torch.optim as optim
 from torchvision import transforms, datasets
 from torch.utils.data import DataLoader
 
+# 분류할 클래스 수
+num_classes = 6
+
 # 이미 학습되어 있는 resnet18 모델 불러오기
 model = models.resnet18(pretrained=True)
-model.fc = nn.Linear(512, 1)
+model.fc = nn.Linear(512, num_classes)
 
 # 데이터 불러오기
 transform = transforms.Compose([
@@ -21,44 +24,48 @@ transform = transforms.Compose([
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
-# 데이터 불러오기
-train_dataset = datasets.ImageFolder("dataset/data/train", transform=transform)
-test_dataset = datasets.ImageFolder("dataset/data/test", transform=transform)
-valid_dataset = datasets.ImageFolder("dataset/data/valid", transform=transform)
+# 데이터 로더 생성 함수 (학습 시에만 호출)
+def create_data_loaders():
+    # 데이터 불러오기
+    train_dataset = datasets.ImageFolder("datasets/train", transform=transform)
+    test_dataset = datasets.ImageFolder("datasets/test", transform=transform)
+    valid_dataset = datasets.ImageFolder("datasets/valid", transform=transform)
 
-# 배치 사이즈 설정
-batch_size = 32
+    # 배치 사이즈 설정
+    batch_size = 32
 
-# 데이터 로더 생성
-train_loader = DataLoader(
-    train_dataset,
-    batch_size=batch_size,
-    shuffle=True, # 에포크마다 섞어서 훈련
-    num_workers=0 # 병렬처리할 cpu 코어 / 윈도우 multiprocessing error시 0으로 처리
-)
-test_loader = DataLoader(
-    test_dataset,
-    batch_size=batch_size,
-    shuffle=False,
-    num_workers=0
-)
-valid_loader = DataLoader(
-    valid_dataset,
-    batch_size=batch_size,
-    shuffle=False,
-    num_workers=0
-)
+    # 데이터 로더 생성
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True, # 에포크마다 섞어서 훈련
+        num_workers=0 # 병렬처리할 cpu 코어 / 윈도우 multiprocessing error시 0으로 처리
+    )
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=0
+    )
+    valid_loader = DataLoader(
+        valid_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=0
+    )
+
+    return train_loader, test_loader, valid_loader
 
 # 사용가능한 디바이스 확인
 if torch.cuda.is_available():
-    device = torch.device('cuda')
+    device = torch.device("cuda")
     print("CUDA GPU 사용")
     print(f"GPU 이름: {torch.cuda.get_device_name(0)}")
 elif torch.backends.mps.is_available():
-    device = torch.device('mps')
+    device = torch.device("mps")
     print("Apple MPS (Metal Performance Shaders) 사용")
 else:
-    device = torch.device('cpu')
+    device = torch.device("cpu")
     print("CPU 사용")
 
 print(f"선택된 디바이스: {device}")
@@ -67,8 +74,7 @@ print(f"선택된 디바이스: {device}")
 model = model.to(device)
 
 # 손실 함수 정의
-# 테스트는 클래스1개 -> 이진분류 사용 추후 여러 클래스 활용시 Cross Entropy로 변경
-criterion = nn.BCEWithLogitsLoss()
+criterion = nn.CrossEntropyLoss()
 
 # 옵티마이저 설정
 optimizer = optim.Adam(model.parameters(), lr=0.001)
@@ -81,11 +87,10 @@ def train_loop(data_loader, model, criterion, optimizer):
 
     for batch_idx, (data, target) in enumerate(data_loader):
         device = next(model.parameters()).device
-        data, target = data.to(device), target.float().to(device)
+        data, target = data.to(device), target.long().to(device)
 
         optimizer.zero_grad()
         outputs = model(data)
-        outputs = outputs.squeeze(-1) # 이진분류 처리
         loss = criterion(outputs, target)
         loss.backward()
         optimizer.step()
@@ -109,16 +114,15 @@ def valid_loop(data_loader, model, criterion):
     with torch.no_grad():
         for data, target in data_loader:
             device = next(model.parameters()).device
-            data, target = data.to(device), target.float().to(device)
+            data, target = data.to(device), target.long().to(device)
 
             outputs = model(data)
-            outputs = outputs.squeeze(-1) # 이진분류 처리
             loss = criterion(outputs, target)
             valid_loss += loss.item() * data.size(0)
 
             # 정확도 계산
-            predictions = torch.sigmoid(outputs) > 0.5
-            correct += (predictions == target.bool()).sum().item()
+            predictions = torch.argmax(outputs, dim=1)
+            correct += (predictions == target).sum().item()
         
     # 평균 계산
     avg_loss = valid_loss / size
@@ -127,15 +131,20 @@ def valid_loop(data_loader, model, criterion):
     print(f"Validation Results: Accuracy: {accuracy:.3f} ({100*accuracy:.1f}%), Avg loss: {avg_loss:.4f}")
     return avg_loss, accuracy
 
+# 학습 반복 수
+epochs = 5
+
 # 학습 실행
-# epochs = 5 # 반복 학습
+if __name__ == "__main__":
+    # 데이터 로더 생성
+    train_loader, test_loader, valid_loader = create_data_loaders()
 
-# for epoch in range(epochs):
-#     print(f"\n[Epoch] {epoch+1} / {epochs}")
-#     train_loss = train_loop(train_loader, model, criterion, optimizer)
-#     valid_loss, valid_acc = valid_loop(valid_loader, model, criterion)
+    for epoch in range(epochs):
+        print(f"\n[Epoch] {epoch+1} / {epochs}")
+        train_loss = train_loop(train_loader, model, criterion, optimizer)
+        valid_loss, valid_acc = valid_loop(valid_loader, model, criterion)
+    print("\n학습 및 검증 완료!")
 
-# print("\n학습 및 검증 완료!")
-
-# torch.save(model.state_dict(), "test_model.pth")
-# print("\n모델 저장 완료!")
+    # 모델 저장
+    torch.save(model.state_dict(), "prototype_model_v1.pth")
+    print("\n모델 저장 완료!")
