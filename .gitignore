@@ -1,12 +1,3 @@
-# macOS
-.DS_Store
-
-# Python cache
-__pycache__/
-
-# Data
-data/
-datasets/
 # === local data & outputs ===
 datasets/
 data/
