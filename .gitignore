@@ -28,3 +28,6 @@ __pycache__/
 # Backend local assets
 backend/uploads/
 backend/app.db
+
+# Model
+*.pth
