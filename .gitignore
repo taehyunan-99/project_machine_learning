@@ -1,13 +1,24 @@
-# macOS
-.DS_Store
-
-# Python cache
-__pycache__/
-
-# Data
-data/
+# === local data & outputs ===
 datasets/
-images/
+data/
+runs/
+weights/
+*.pt
+*.onnx
+*.ckpt
+
+# === mac & python junk ===
+.DS_Store
+__pycache__/
+.ipynb_checkpoints/
+# OS / Python
+.DS_Store
+__pycache__/
+*.pyc
+
+# Backend local assets
+backend/uploads/
+backend/app.db
 
 # Model
 *.pth
