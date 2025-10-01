@@ -22,3 +22,11 @@ weights/
 .DS_Store
 __pycache__/
 .ipynb_checkpoints/
+# OS / Python
+.DS_Store
+__pycache__/
+*.pyc
+
+# Backend local assets
+backend/uploads/
+backend/app.db
