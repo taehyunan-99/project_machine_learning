@@ -7,9 +7,10 @@ import torch
 import torchvision.models as models
 import torch.nn as nn
 from PIL import Image
+import os
 
 # 학습이 완료된 모델 가져오기
-model_path = "../backend/models/prototype_model_v1.pth"
+model_path = os.path.join(os.path.dirname(__file__), "../backend/models/prototype_model_v1.pth")
 def load_trained_model(model_path=model_path):
     # 모델 구조
     model = models.resnet18(pretrained=False)

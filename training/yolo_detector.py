@@ -1,12 +1,14 @@
 # YOLO 구현
 
 from ultralytics import YOLO
-import numpy as np
+import os
 
 # 모델 로딩을 한번만 하기 위해 클래스로 구현
 class YOLODetector:
     # YOLO 초기화
-    def __init__(self, model_path="yolo11n.pt"):
+    def __init__(self, model_path=None):
+        if model_path is None:
+            model_path = os.path.join(os.path.dirname(__file__), "yolo11n.pt")
         self.model = YOLO(model_path)
     
     # 객체 탐지 함수
