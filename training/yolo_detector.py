@@ -8,7 +8,7 @@ class YOLODetector:
     # YOLO 초기화
     def __init__(self, model_path=None):
         if model_path is None:
-            model_path = os.path.join(os.path.dirname(__file__), "yolo11n.pt")
+            model_path = os.path.join(os.path.dirname(__file__), "yolo11m.pt")
         self.model = YOLO(model_path)
     
     # 객체 탐지 함수
@@ -61,12 +61,12 @@ if __name__ == "__main__":
     detector = YOLODetector()
 
     # 2. 이미지 검출 실행
-    img = "datasets/yolo_test/p6.jpg"
-    results = detector.detect_objects(img)
+    # img = "datasets/yolo_test/p6.jpg"
+    # results = detector.detect_objects(img)
 
-    # 3. 결과 출력
-    print(f"\n=== 최종 결과 ===")
-    print(f"총 {len(results)}개 객체 검출")
+    # # 3. 결과 출력
+    # print(f"\n=== 최종 결과 ===")
+    # print(f"총 {len(results)}개 객체 검출")
 
-    for i, obj in enumerate(results):
-        print(f"객체{i+1} : {obj}")
+    # for i, obj in enumerate(results):
+    #     print(f"객체{i+1} : {obj}")

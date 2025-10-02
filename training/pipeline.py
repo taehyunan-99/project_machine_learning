@@ -10,7 +10,7 @@ from PIL import Image
 import os
 
 # 학습이 완료된 모델 가져오기
-model_path = os.path.join(os.path.dirname(__file__), "../backend/models/prototype_model_v1.pth")
+model_path = os.path.join(os.path.dirname(__file__), "../backend/models/model_v1.pth")
 def load_trained_model(model_path=model_path):
     # 모델 구조
     model = models.resnet18(pretrained=False)
@@ -43,7 +43,8 @@ class YOLOResNetPipeline:
     # 파이프라인 초기화
     def __init__(self):
         # YOLO 초기화
-        self.yolo = YOLODetector()
+        yolo_model_path = os.path.join(os.path.dirname(__file__), "../backend/models/yolo11m.pt")
+        self.yolo = YOLODetector(model_path=yolo_model_path)
         # ResNet 모델 초기화
         self.resnet = load_trained_model()
         self.transform = transform
@@ -192,4 +193,6 @@ if __name__ == "__main__":
                 category = item["recycling_info"]["category"]
                 confidence = item["recycling_info"]["confidence"]
                 print(f"   • 객체 {item["item_id"]}: {category} (신뢰도: {confidence:.3f})")
+        print(f"{'='*70}\n")
+        
     print("\n전체 테스트 완료!")
