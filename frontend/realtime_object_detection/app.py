@@ -1,102 +1,157 @@
 # 필요한 라이브러리 임포트
+import os
 from flask import Flask, render_template, Response
-import cv2 as cv
+import cv2
 import numpy as np
+from PIL import Image
+import torch
+import torchvision.models as models
+import torch.nn as nn
+from torchvision import transforms
+from ultralytics import YOLO
 
-# Flask 앱 초기화
+# --- 1. Flask 앱 및 기본 설정 ---
 app = Flask(__name__)
 
-# ----------------- 모델 및 설정 로드 -----------------
-# 모델 파일 경로
-prototxt = "model/deploy.prototxt.txt"
-model = "model/mobilenet_iter_73000.caffemodel.txt"
+# --- 2. 모델 로드 및 파이프라인 준비 ---
+print("Initializing models and setting up the pipeline...")
 
-# 최소 신뢰도(정확도) 임계값 설정
-conf_threshold = 0.6 
+# 사용 가능한 디바이스 설정 (CUDA, MPS, CPU 순으로 자동 선택)
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+    print("Using CUDA GPU")
+elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+    device = torch.device("mps")
+    print("Using Apple MPS (Metal Performance Shaders)")
+else:
+    device = torch.device("cpu")
+    print("Using CPU")
 
-# MobileNet-SSD가 탐지할 수 있는 클래스 레이블
-CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
-	"bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
-	"dog", "horse", "motorbike", "person", "pottedplant", "sheep",
-	"sofa", "train", "tvmonitor"]
+# ResNet 모델 구조 정의 및 로드 함수
+def load_resnet_model(model_path):
+    model = models.resnet18(weights=None)
+    model.fc = nn.Linear(512, 6)
+    
+    if not os.path.exists(model_path):
+        print(f"FATAL ERROR: ResNet model weights not found at '{model_path}'")
+        print("Please run 'python my_model.py' to train and generate the 'model_v1.pth' file.")
+        return None
+        
+    try:
+        model.load_state_dict(torch.load(model_path, map_location=device))
+    except Exception as e:
+        print(f"An error occurred while loading the ResNet model: {e}")
+        return None
+        
+    model.to(device)
+    model.eval()
+    print("ResNet model loaded successfully.")
+    return model
 
-# 각 클래스에 대해 랜덤 색상 부여
-COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
+# YOLO 모델 로드 (ultralytics 라이브러리 사용)
+yolo_detector = None
+try:
+    yolo_model_path = "models/yolo11m.pt"
+    if not os.path.exists(yolo_model_path):
+        print(f"FATAL ERROR: YOLO model not found at '{yolo_model_path}'")
+    else:
+        yolo_detector = YOLO(yolo_model_path)
+        print("YOLO model loaded successfully.")
+except Exception as e:
+    print(f"An error occurred while loading the YOLO model: {e}")
 
-# 모델 로드
-print("[INFO] loading model...")
-net = cv.dnn.readNetFromCaffe(prototxt, model)
+# ResNet 모델 로드
+resnet_model_path = "models/model_v1.pth"
+resnet_model = load_resnet_model(resnet_model_path)
 
-# 웹캠 카메라 실행 (0번 카메라)
-camera = cv.VideoCapture(0)
-# ----------------------------------------------------
+# 이미지 전처리를 위한 변환
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+])
 
+# 분류 결과 매핑
+recycling_classes = {
+    0: "Can", 1: "Glass", 2: "Paper", 3: "Plastic", 4: "Styrofoam", 5: "Vinyl"
+}
 
+# 웹캠 실행
+camera = cv2.VideoCapture(0)
+
+# --- 3. 비디오 스트리밍 및 추론 함수 ---
 def generate_frames():
-    """
-    카메라 프레임을 지속적으로 읽어와 객체 탐지를 수행하고,
-    결과를 스트리밍 가능한 형태로 반환하는 제너레이터 함수.
-    """
+    if yolo_detector is None or resnet_model is None:
+        error_message = "Model loading failed. Check terminal for details."
+        while True:
+            frame = np.zeros((480, 640, 3), dtype=np.uint8)
+            cv2.putText(frame, error_message, (50, 240), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame_bytes = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+        
     while True:
-        # 카메라에서 프레임 읽기
         success, frame = camera.read()
         if not success:
             break
-        else:
-            # 프레임의 높이와 너비 가져오기
-            (h, w) = frame.shape[:2]
 
-            # 이미지를 blob 형태로 변환 (전처리)
-            # 300x300으로 크기 조정 및 정규화
-            blob = cv.dnn.blobFromImage(cv.resize(frame, (300, 300)), 0.007843, (300, 300), 127.5)
+        yolo_results = yolo_detector(frame, verbose=False)[0]
 
-            # blob을 네트워크의 입력으로 설정
-            net.setInput(blob)
-            
-            # 객체 탐지 수행 (순방향 전파)
-            detections = net.forward()
+        if yolo_results.boxes is not None:
+            for box in yolo_results.boxes:
+                coords = box.xyxy[0].cpu().numpy().astype(int)
+                x1, y1, x2, y2 = coords
+                
+                cropped_img = frame[y1:y2, x1:x2]
+                
+                if cropped_img.size == 0: continue
+                cropped_rgb = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB)
+                pil_img = Image.fromarray(cropped_rgb)
+                input_tensor = transform(pil_img).unsqueeze(0).to(device)
 
-            # 탐지된 객체들을 순회
-            for i in np.arange(0, detections.shape[2]):
-                # 탐지 결과의 신뢰도(정확도) 추출
-                confidence = detections[0, 0, i, 2]
+                with torch.no_grad():
+                    outputs = resnet_model(input_tensor)
+                    prob = torch.nn.functional.softmax(outputs[0], dim=0)
+                    predicted_class_id = torch.argmax(outputs[0]).item()
+                    resnet_confidence = prob[predicted_class_id].item()
 
-                # 신뢰도가 설정한 임계값보다 높은 경우에만 처리
-                if confidence > conf_threshold:
-                    # 클래스 레이블 인덱스 추출
-                    idx = int(detections[0, 0, i, 1])
-                    
-                    # 객체 주위에 경계 상자(bounding box) 그리기
-                    box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-                    (startX, startY, endX, endY) = box.astype("int")
+                label = recycling_classes.get(predicted_class_id, "Unknown")
+                display_text = f"{label}: {resnet_confidence:.2f}"
+                
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                cv2.putText(frame, display_text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
-                    # 레이블과 신뢰도 텍스트 준비
-                    label = f"{CLASSES[idx]}: {confidence*100:.2f}%"
-                    
-                    # 경계 상자와 텍스트를 프레임에 그리기
-                    cv.rectangle(frame, (startX, startY), (endX, endY), COLORS[idx], 2)
-                    y = startY - 15 if startY - 15 > 15 else startY + 15
-                    cv.putText(frame, label, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame_bytes = buffer.tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 
-            # 프레임을 JPEG 형식으로 인코딩
-            ret, buffer = cv.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-
-            # yield 키워드를 사용하여 프레임을 스트리밍
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-
+# --- 4. Flask 라우팅 ---
 @app.route('/')
 def index():
-    """웹사이트의 메인 페이지를 렌더링합니다."""
     return render_template('index.html')
 
 @app.route('/video_feed')
 def video_feed():
-    """비디오 스트리밍 경로. generate_frames 함수를 통해 실시간 영상을 전송합니다."""
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+# --- 5. 앱 실행 ---
 if __name__ == '__main__':
-    # Flask 앱 실행 (디버그 모드 활성화)
+    if not os.path.exists('templates'):
+        os.makedirs('templates')
+    
+    if not os.path.exists('templates/index.html'):
+        with open('templates/index.html', 'w', encoding='utf-8') as f:
+            f.write("""
+            <!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>실시간 재활용품 분류</title>
+            <style>body{font-family:sans-serif;text-align:center;margin-top:50px;}img{border:2px solid #ccc;border-radius:8px;}</style>
+            </head><body><h1>실시간 재활용품 분류 도우미</h1>
+            <img src="{{ url_for('video_feed') }}" width="640" height="480"></body></html>
+            """)
+            
+    if not os.path.exists('models'):
+        os.makedirs('models')
+        print("Warning: 'models' folder created. Please place model files in this folder.")
+
     app.run(debug=True)

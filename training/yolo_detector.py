@@ -2,7 +2,6 @@
 
 from ultralytics import YOLO
 import os
-
 # 모델 로딩을 한번만 하기 위해 클래스로 구현
 class YOLODetector:
     # YOLO 초기화
