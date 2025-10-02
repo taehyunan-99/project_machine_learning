@@ -5,7 +5,7 @@ import torchvision.models as models
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import transforms, datasets
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, WeightedRandomSampler
 
 # 분류할 클래스 수
 num_classes = 6
@@ -32,13 +32,33 @@ def create_data_loaders():
     valid_dataset = datasets.ImageFolder("datasets/valid", transform=transform)
 
     # 배치 사이즈 설정
-    batch_size = 32
+    batch_size = 64
+
+    # WeightedRandomSampler 설정 (클래스 불균형 해결)
+    # 각 클래스별 샘플 개수 계산
+    class_counts = [len([x for x in train_dataset.targets if x == i])
+                    for i in range(num_classes)]
+    print(f"클래스별 샘플 개수: {class_counts}")
+
+    # 가중치 계산 (샘플이 적을수록 높은 가중치)
+    class_weights = [1.0 / count for count in class_counts]
+    print(f"클래스별 가중치: {[f'{w:.6f}' for w in class_weights]}")
+
+    # 각 샘플에 가중치 할당
+    sample_weights = [class_weights[label] for label in train_dataset.targets]
+
+    # WeightedRandomSampler 생성
+    sampler = WeightedRandomSampler(
+        weights=sample_weights,
+        num_samples=len(sample_weights),
+        replacement=True  # 중복 샘플링 허용
+    )
 
     # 데이터 로더 생성
     train_loader = DataLoader(
         train_dataset,
         batch_size=batch_size,
-        shuffle=True, # 에포크마다 섞어서 훈련
+        sampler=sampler,  # shuffle 대신 sampler 사용
         num_workers=0 # 병렬처리할 cpu 코어 / 윈도우 multiprocessing error시 0으로 처리
     )
     test_loader = DataLoader(
@@ -77,7 +97,7 @@ model = model.to(device)
 criterion = nn.CrossEntropyLoss()
 
 # 옵티마이저 설정
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
 # 학습 루프 함수 정의
 def train_loop(data_loader, model, criterion, optimizer):
@@ -132,7 +152,7 @@ def valid_loop(data_loader, model, criterion):
     return avg_loss, accuracy
 
 # 학습 반복 수
-epochs = 5
+epochs = 15
 
 # 학습 실행
 if __name__ == "__main__":
@@ -146,5 +166,5 @@ if __name__ == "__main__":
     print("\n학습 및 검증 완료!")
 
     # 모델 저장
-    torch.save(model.state_dict(), "prototype_model_v1.pth")
+    torch.save(model.state_dict(), "model_v1.pth")
     print("\n모델 저장 완료!")
