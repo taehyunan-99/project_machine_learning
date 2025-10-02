@@ -28,3 +28,9 @@ __pycache__/
 # Backend local assets
 backend/uploads/
 backend/app.db
+
+# ignore local weights
+backend/app/model_weights/
+backend/app/static/models/
+*.onnx
+*.pth
