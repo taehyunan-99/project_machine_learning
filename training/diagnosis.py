@@ -20,8 +20,8 @@ class_name = {
 
 # 경로 지정
 ssd_path = "/Volumes/TaeHyun SSD/ml_data/"
-local_path = "datasets/"
-folder_path = ssd_path
+local_path = "datasets/resnet/"
+folder_path = local_path
 
 print("="*70)
 print("모델 진단 스크립트 시작")
