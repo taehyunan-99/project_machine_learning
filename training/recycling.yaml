@@ -1,7 +1,7 @@
 # 재활용품 6종 분류 데이터셋 설정
 
-# 데이터셋 경로
-path: datasets/yolo_dataset
+# 데이터셋 경로 (Windows 외장하드)
+path: D:/ml_data/yolo_dataset
 train: images/train
 val: images/valid
 test: images/test

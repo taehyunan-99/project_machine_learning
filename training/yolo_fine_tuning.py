@@ -15,19 +15,19 @@ class_mapping = {
 }
 
 # YOLO형식으로 폴더 구조 변환
-def prepare_yolo_dataset(source_dir="datasets", output_dir="yolo_dataset"):
-    # 긱 폴더를 순회
+def prepare_yolo_dataset(source_dir="D:/ml_data/resnet", output_dir="D:/ml_data/yolo_dataset"):
+    # 각 폴더를 순회
     for folder in ["train", "valid", "test"]:
         # 이미지 / 라벨 폴더 생성
-        img_path = os.path.join(source_dir, output_dir, "images", folder)
-        label_path = os.path.join(source_dir, output_dir, "labels", folder)
+        img_path = os.path.join(output_dir, "images", folder)
+        label_path = os.path.join(output_dir, "labels", folder)
         os.makedirs(img_path, exist_ok=True)
         os.makedirs(label_path, exist_ok=True)
 
         # 클래스별 이미지 처리
         for class_name in class_mapping.keys():
             # 각 클래스 이미지 폴더에 접근
-            source_class_dir = os.path.join(source_dir, "resnet", folder, class_name)
+            source_class_dir = os.path.join(source_dir, folder, class_name)
             # 이미지 파일 찾기
             for img_file in Path(source_class_dir).glob("*.jpg"):
                 # 새 파일명 생성

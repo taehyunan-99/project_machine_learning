@@ -26,10 +26,13 @@ transform = transforms.Compose([
 
 # 데이터 로더 생성 함수 (학습 시에만 호출)
 def create_data_loaders():
+    # 외장하드 경로 설정 (Windows)
+    data_path = "D:/ml_data/resnet"
+
     # 데이터 불러오기
-    train_dataset = datasets.ImageFolder("datasets/train", transform=transform)
-    test_dataset = datasets.ImageFolder("datasets/test", transform=transform)
-    valid_dataset = datasets.ImageFolder("datasets/valid", transform=transform)
+    train_dataset = datasets.ImageFolder(f"{data_path}/train", transform=transform)
+    test_dataset = datasets.ImageFolder(f"{data_path}/test", transform=transform)
+    valid_dataset = datasets.ImageFolder(f"{data_path}/valid", transform=transform)
 
     # 배치 사이즈 설정
     batch_size = 64

@@ -21,7 +21,8 @@ class_name = {
 # 경로 지정
 ssd_path = "/Volumes/TaeHyun SSD/ml_data/"
 local_path = "datasets/resnet/"
-folder_path = local_path
+win_path = "D:/ml_data/resnet/"  
+folder_path = win_path
 
 print("="*70)
 print("모델 진단 스크립트 시작")
@@ -113,4 +114,4 @@ def test_model_predictions(sample_size=20):
 # 실행
 if __name__ == "__main__":
     analyze_dataset()
-    test_model_predictions(sample_size=20)
+    # test_model_predictions(sample_size=20)

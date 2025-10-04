@@ -71,6 +71,6 @@ def data_rename(data_source_path, class_name):
 # 파일 실행
 data_source_path = "/Volumes/TaeHyun SSD/ml_data/valid/vinyl"
 
-if __name__ == "__main__":
-    # 테스트 실행
-    data_rename(data_source_path, "vinyl")
+# if __name__ == "__main__":
+#     # 테스트 실행
+#     data_rename(data_source_path, "vinyl")
