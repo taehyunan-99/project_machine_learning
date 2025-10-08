@@ -14,13 +14,44 @@ num_classes = 6
 model = models.resnet18(pretrained=True)
 model.fc = nn.Linear(512, num_classes)
 
-# 데이터 불러오기
-transform = transforms.Compose([
-    # 데이터 전처리 (224x224) 사이즈로 통일
+# 데이터 전처리 - 학습용 (augmentation 강화)
+train_transform = transforms.Compose([
     transforms.Resize((224,224)),
-    # 텐서로 변환
+    # 데이터 증강 (강화 버전)
+    transforms.RandomHorizontalFlip(p=0.5), # 좌우 반전 50%
+    transforms.RandomRotation(degrees=30), # -30° ~ +30° 회전
+    # 색상 변화
+    transforms.ColorJitter(                   
+        brightness=0.4, # 밝기 ±40% (강화: 0.3→0.4)
+        contrast=0.4, # 대비 ±40%
+        saturation=0.4, # 채도 ±40%
+        hue=0.15 # 색조 ±15% (강화: 0.1→0.15)
+    ),
+    # 기하학적 변형
+    transforms.RandomAffine(                  
+        degrees=0,
+        translate=(0.15, 0.15), # 상하좌우 15% 이동
+        scale=(0.85, 1.15) # 85~115% 크기 변화
+    ),
+    # 원근 왜곡 추가
+    transforms.RandomPerspective(
+        distortion_scale=0.2,
+        p=0.3 # 30% 확률
+    ),
+    transforms.ToTensor(), # PIL Image → Tensor 변환
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+    # 일부 가림 추가
+    transforms.RandomErasing(
+        p=0.2, # 20% 확률
+        scale=(0.02, 0.15), # 2~15% 영역 가림
+        ratio=(0.3, 3.3)
+    )
+])
+
+# 데이터 전처리 - 검증/테스트용 (augmentation 없음)
+test_transform = transforms.Compose([
+    transforms.Resize((224,224)),
     transforms.ToTensor(),
-    # ImageNet 통계로 정규화
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
@@ -29,10 +60,10 @@ def create_data_loaders():
     # 외장하드 경로 설정 (Windows)
     data_path = "D:/ml_data/resnet"
 
-    # 데이터 불러오기
-    train_dataset = datasets.ImageFolder(f"{data_path}/train", transform=transform)
-    test_dataset = datasets.ImageFolder(f"{data_path}/test", transform=transform)
-    valid_dataset = datasets.ImageFolder(f"{data_path}/valid", transform=transform)
+    # 데이터 불러오기 (학습용은 augmentation 적용)
+    train_dataset = datasets.ImageFolder(f"{data_path}/train", transform=train_transform)
+    test_dataset = datasets.ImageFolder(f"{data_path}/test", transform=test_transform)
+    valid_dataset = datasets.ImageFolder(f"{data_path}/valid", transform=test_transform)
 
     # 배치 사이즈 설정
     batch_size = 64
@@ -77,7 +108,7 @@ def create_data_loaders():
         num_workers=0
     )
 
-    return train_loader, test_loader, valid_loader
+    return train_loader, test_loader, valid_loader, class_counts
 
 # 사용가능한 디바이스 확인
 if torch.cuda.is_available():
@@ -95,9 +126,6 @@ print(f"선택된 디바이스: {device}")
 
 # 모델을 디바이스로 이동
 model = model.to(device)
-
-# 손실 함수 정의
-criterion = nn.CrossEntropyLoss()
 
 # 옵티마이저 설정
 optimizer = optim.Adam(model.parameters(), lr=0.0001)
@@ -120,7 +148,7 @@ def train_loop(data_loader, model, criterion, optimizer):
 
         running_loss += loss.item() * data.size(0)
 
-        if (batch_idx+1) % 10 == 0:
+        if (batch_idx+1) % 100 == 0:
             current = batch_idx * len(data)
             print(f"[batch : {batch_idx+1: 4d}], Loss : {loss.item():>7f} ({current:>5d} / {size:>5d})")
     
@@ -155,12 +183,32 @@ def valid_loop(data_loader, model, criterion):
     return avg_loss, accuracy
 
 # 학습 반복 수
-epochs = 15
+epochs = 20
 
 # 학습 실행
 if __name__ == "__main__":
     # 데이터 로더 생성
-    train_loader, test_loader, valid_loader = create_data_loaders()
+    train_loader, test_loader, valid_loader, class_counts = create_data_loaders()
+
+    # 손실 함수 정의 (클래스 가중치 적용 - 종이/플라스틱 강화)
+    # 기본 가중치 계산
+    base_weights = [1.0/count for count in class_counts]
+
+    # 종이(idx=2)와 플라스틱(idx=3)에 추가 가중치 부여
+    adjusted_weights = [
+        base_weights[0], # 캔
+        base_weights[1], # 유리
+        base_weights[2] * 2.0, # 종이
+        base_weights[3] * 1.5, # 플라스틱
+        base_weights[4], # 스티로폼
+        base_weights[5] # 비닐
+    ]
+
+    class_weights = torch.tensor(adjusted_weights).to(device)
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
+    print(f"\n기본 가중치: {[f'{w:.6f}' for w in base_weights]}")
+    print(f"조정 가중치: {[f'{w:.6f}' for w in class_weights.cpu().numpy()]}")
+    print("(종이 2배, 플라스틱 1.5배 강화 적용)")
 
     for epoch in range(epochs):
         print(f"\n[Epoch] {epoch+1} / {epochs}")
@@ -169,5 +217,5 @@ if __name__ == "__main__":
     print("\n학습 및 검증 완료!")
 
     # 모델 저장
-    torch.save(model.state_dict(), "model_v1.pth")
+    torch.save(model.state_dict(), "model_v3.pth")
     print("\n모델 저장 완료!")

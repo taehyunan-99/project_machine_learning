@@ -1,6 +1,6 @@
 # YOLO + ResNet Model 파이프라인
 
-from model import transform
+from model import test_transform
 from yolo_detector import YOLODetector
 import cv2 as cv
 import torch
@@ -30,7 +30,7 @@ def load_trained_model(model_path=model_path):
     return model
 
 class YOLOResNetPipeline:
-    # 재활용 분류 매핑 (알파벳 순서: Can, Glass, Paper, Plastic, Styrofoam, Vinyl)
+    # 재활용 분류 매핑
     recycling_classes = {
         0: {"category": "캔", "item_type": "캔류", "method": "내용물 비우고 캔 전용 수거함"}, # Can
         1: {"category": "유리", "item_type": "유리병", "method": "뚜껑 분리하고 유리 전용 수거함"}, # Glass
@@ -47,7 +47,7 @@ class YOLOResNetPipeline:
         self.yolo = YOLODetector(model_path=yolo_model_path)
         # ResNet 모델 초기화
         self.resnet = load_trained_model()
-        self.transform = transform
+        self.transform = test_transform
 
     # 객체 처리 함수
     def process_object(self, img_path):
@@ -164,13 +164,13 @@ class YOLOResNetPipeline:
 # =============테스트 실행=============
 if __name__ == "__main__":
     pipeline = YOLOResNetPipeline()
-    # 테스트할 이미지 파일들
+    # 테스트할 이미지 파일들 (외장하드)
     test_images = [
-        "datasets/pipe_test/test1.jpg",
-        "datasets/pipe_test/test2.jpg",
-        "datasets/pipe_test/test3.jpg",
-        "datasets/pipe_test/test4.jpg",
-        "datasets/pipe_test/test5.jpg"
+        "D:/ml_data/pipe_test/test1.jpg",
+        "D:/ml_data/pipe_test/test2.jpg",
+        "D:/ml_data/pipe_test/test3.jpg",
+        "D:/ml_data/pipe_test/test4.jpg",
+        "D:/ml_data/pipe_test/test5.jpg"
     ]
     print("YOLO + ResNet 파이프라인 종합 테스트 시작")
 

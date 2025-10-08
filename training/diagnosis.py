@@ -5,7 +5,7 @@ import torch
 from torchvision import datasets
 from collections import Counter
 import random
-from model import transform
+from model import test_transform
 from pipeline import load_trained_model
 
 # 클래스 매핑
@@ -71,7 +71,7 @@ def test_model_predictions(sample_size=20):
     print(f"디바이스 : {device}")
 
     # 테스트 데이터셋 불러오기
-    test_dataset = datasets.ImageFolder(f"{folder_path}test", transform=transform)
+    test_dataset = datasets.ImageFolder(f"{folder_path}test", transform=test_transform)
 
     # 예측 결과를 저장할 딕셔너리 생성
     prediction_results = {}
@@ -114,4 +114,4 @@ def test_model_predictions(sample_size=20):
 # 실행
 if __name__ == "__main__":
     analyze_dataset()
-    # test_model_predictions(sample_size=20)
+    test_model_predictions(sample_size=50)
