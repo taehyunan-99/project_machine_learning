@@ -13,9 +13,10 @@ class_name = {
     0: "캔",
     1: "유리",
     2: "종이",
-    3: "플라스틱",
-    4: "스티로폼",
-    5: "비닐"
+    3: "불투명_플라스틱",
+    4: "페트병",
+    5: "스티로폼",
+    6: "비닐"
 }
 
 # 경로 지정
@@ -77,7 +78,7 @@ def test_model_predictions(sample_size=20):
     prediction_results = {}
 
     # 클래스별 분포 확인
-    for true_class in range(6):
+    for true_class in range(7):
         print(f"\n실제 클래스: {class_name[true_class]}")
         # 해당 클래스의 인덱스 찾기
         class_indices = [idx for idx, label in enumerate(test_dataset.targets) if label == true_class]

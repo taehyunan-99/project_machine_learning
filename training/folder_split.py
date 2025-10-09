@@ -69,9 +69,9 @@ def data_rename(data_source_path, class_name):
         print(f"오류: {data_source_path} 폴더를 찾을 수 없습니다.")
 
 # 파일 실행
-win_path = "D:/ml_data/resnet/p"
+win_path = "D:/ml_data/data/plastic_transparent/il"
 data_source_path = "/Volumes/TaeHyun SSD/ml_data/valid/vinyl"
 
 if __name__ == "__main__":
     # 테스트 실행
-    data_rename(win_path, "new_plastic_2")
+    data_rename(win_path, "plastic_transparent_1")

@@ -8,44 +8,25 @@ from torchvision import transforms, datasets
 from torch.utils.data import DataLoader, WeightedRandomSampler
 
 # 분류할 클래스 수
-num_classes = 6
+num_classes = 7  # can, glass, paper, plastic_opaque, plastic_pet, styrofoam, vinyl
 
 # 이미 학습되어 있는 resnet18 모델 불러오기
 model = models.resnet18(pretrained=True)
-model.fc = nn.Linear(512, num_classes)
+model.fc = nn.Linear(512, num_classes)  # 7개 클래스 출력
 
-# 데이터 전처리 - 학습용 (augmentation 강화)
+# 데이터 전처리 - 학습용
 train_transform = transforms.Compose([
     transforms.Resize((224,224)),
-    # 데이터 증강 (강화 버전)
-    transforms.RandomHorizontalFlip(p=0.5), # 좌우 반전 50%
-    transforms.RandomRotation(degrees=30), # -30° ~ +30° 회전
-    # 색상 변화
-    transforms.ColorJitter(                   
-        brightness=0.4, # 밝기 ±40% (강화: 0.3→0.4)
-        contrast=0.4, # 대비 ±40%
-        saturation=0.4, # 채도 ±40%
-        hue=0.15 # 색조 ±15% (강화: 0.1→0.15)
+    # 최소한의 증강만
+    transforms.RandomHorizontalFlip(p=0.3), # 좌우반전 30%
+    transforms.ColorJitter( # 색상만 약하게
+        brightness=0.2, # 밝기 20%
+        contrast=0.2, # 대비 20%
+        saturation=0.2, # 채도 20%
+        hue=0.05 # 색조 5%
     ),
-    # 기하학적 변형
-    transforms.RandomAffine(                  
-        degrees=0,
-        translate=(0.15, 0.15), # 상하좌우 15% 이동
-        scale=(0.85, 1.15) # 85~115% 크기 변화
-    ),
-    # 원근 왜곡 추가
-    transforms.RandomPerspective(
-        distortion_scale=0.2,
-        p=0.3 # 30% 확률
-    ),
-    transforms.ToTensor(), # PIL Image → Tensor 변환
-    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-    # 일부 가림 추가
-    transforms.RandomErasing(
-        p=0.2, # 20% 확률
-        scale=(0.02, 0.15), # 2~15% 영역 가림
-        ratio=(0.3, 3.3)
-    )
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
 # 데이터 전처리 - 검증/테스트용 (augmentation 없음)
@@ -194,21 +175,21 @@ if __name__ == "__main__":
     # 기본 가중치 계산
     base_weights = [1.0/count for count in class_counts]
 
-    # 종이(idx=2)와 플라스틱(idx=3)에 추가 가중치 부여
+    # 종이(idx=2)와 플라스틱(idx=3,4)에 추가 가중치 부여
     adjusted_weights = [
         base_weights[0], # 캔
         base_weights[1], # 유리
         base_weights[2] * 2.0, # 종이
-        base_weights[3] * 1.5, # 플라스틱
-        base_weights[4], # 스티로폼
-        base_weights[5] # 비닐
+        base_weights[3] * 1.3, # 불투명_플라스틱
+        base_weights[4] * 1.3, # PET병
+        base_weights[5], # 스티로폼
+        base_weights[6] # 비닐
     ]
 
     class_weights = torch.tensor(adjusted_weights).to(device)
     criterion = nn.CrossEntropyLoss(weight=class_weights)
     print(f"\n기본 가중치: {[f'{w:.6f}' for w in base_weights]}")
     print(f"조정 가중치: {[f'{w:.6f}' for w in class_weights.cpu().numpy()]}")
-    print("(종이 2배, 플라스틱 1.5배 강화 적용)")
 
     for epoch in range(epochs):
         print(f"\n[Epoch] {epoch+1} / {epochs}")
@@ -217,5 +198,5 @@ if __name__ == "__main__":
     print("\n학습 및 검증 완료!")
 
     # 모델 저장
-    torch.save(model.state_dict(), "model_v3.pth")
+    torch.save(model.state_dict(), "model_v4.pth")
     print("\n모델 저장 완료!")
