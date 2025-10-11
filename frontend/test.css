@@ -1,0 +1,441 @@
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    background-color: #f6f8f6;
+    color: #1c1c1c;
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* Dark mode */
+body.dark-mode {
+    background-color: #102216;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Layout Container */
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* Header */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+    background-color: #f6f8f6;
+    z-index: 100;
+}
+
+body.dark-mode .header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+    background-color: #102216;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    transition: opacity 0.3s;
+}
+
+.logo-icon {
+    font-size: 1.875rem;
+    color: #11d452;
+}
+
+.logo-text {
+    color: #1c1c1c;
+    font-size: 1.25rem;
+}
+
+body.dark-mode .logo-text {
+    color: white;
+}
+
+.nav {
+    display: none;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.nav a {
+    transition: color 0.2s;
+}
+
+.nav a:hover {
+    color: #11d452;
+}
+
+/* Desktop navigation */
+@media (min-width: 768px) {
+    .nav {
+        display: flex;
+    }
+
+    .mobile-menu-btn {
+        display: none;
+    }
+}
+
+.mobile-menu-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    padding: 0.5rem;
+}
+
+.mobile-menu-btn .material-symbols-outlined {
+    font-size: 1.5rem;
+}
+
+/* Main Content */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    padding-top: 100px;
+    text-align: center;
+}
+
+.content-wrapper {
+    max-width: 48rem;
+    width: 100%;
+}
+
+.title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: #1c1c1c;
+}
+
+body.dark-mode .title {
+    color: white;
+}
+
+@media (min-width: 768px) {
+    .title {
+        font-size: 3rem;
+    }
+}
+
+.description {
+    margin-top: 1rem;
+    font-size: 1.125rem;
+    color: rgba(0, 0, 0, 0.6);
+    max-width: 42rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body.dark-mode .description {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Upload Area */
+.upload-section {
+    margin-top: 3rem;
+    width: 100%;
+}
+
+.upload-area {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 0.75rem;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+body.dark-mode .upload-area {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.upload-area:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(17, 212, 82, 0.5);
+}
+
+.upload-area.has-image {
+    border: none;
+}
+
+body.dark-mode .upload-area:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.upload-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.upload-prompt.hidden {
+    display: none;
+}
+
+.upload-icon {
+    font-size: 3.75rem;
+    color: #11d452;
+    transition: all 0.2s ease;
+}
+
+.upload-area:hover .upload-icon {
+    opacity: 0.7;
+    transform: scale(1.1);
+}
+
+.upload-text {
+    margin-top: 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.upload-area:hover .upload-text {
+    opacity: 0.7;
+    transform: translateY(5px);
+}
+
+.file-input {
+    display: none;
+}
+
+.image-preview {
+    width: 100%;
+    height: 100%;
+    border-radius: 0.75rem;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.image-preview.hidden {
+    display: none;
+}
+
+.camera-feed {
+    width: 100%;
+    height: 100%;
+    border-radius: 0.75rem;
+    background-color: #000;
+    position: relative;
+}
+
+.camera-feed.hidden {
+    display: none;
+}
+
+.camera-feed::after {
+    content: "카메라 피드가 여기에 표시됩니다.";
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Drag and drop states */
+.upload-area.drag-over {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .upload-area.drag-over {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Action Buttons */
+.button-group {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    justify-content: center;
+}
+
+@media (min-width: 640px) {
+    .button-group {
+        flex-direction: row;
+    }
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-realtime {
+    background-color: #374151;
+    color: white;
+}
+
+.btn-analyze {
+    background-color: rgba(17, 212, 82, 0.9);
+    color: white;
+}
+
+/* PC에서만 hover 효과 */
+@media (hover: hover) {
+    .btn-realtime:hover {
+        transform: scale(1.05);
+        background-color: #4b5563;
+    }
+
+    .btn-analyze:hover {
+        transform: scale(1.05);
+        background-color: rgba(17, 212, 82, 0.7);
+    }
+}
+
+/* 모바일 터치 효과 */
+.btn-realtime:active {
+    background-color: #1f2937;
+}
+
+.btn-analyze:active {
+    background-color: rgba(17, 212, 82, 0.7);
+}
+
+.btn:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* Results Section */
+.results-section {
+    margin-top: 4rem;
+    width: 100%;
+}
+
+.results-section.hidden {
+    display: none;
+}
+
+.results-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1c1c1c;
+}
+
+body.dark-mode .results-title {
+    color: white;
+}
+
+.results-card {
+    margin-top: 1.5rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 2rem;
+    border-radius: 0.75rem;
+    text-align: left;
+    min-height: 120px;
+}
+
+body.dark-mode .results-card {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.result-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.result-icon {
+    font-size: 3rem;
+}
+
+.result-label {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1c1c1c;
+}
+
+body.dark-mode .result-label {
+    color: white;
+}
+
+.result-status {
+    color: #11d452;
+    font-weight: 600;
+}
+
+.result-description {
+    margin-top: 1rem;
+    color: rgba(0, 0, 0, 0.7);
+}
+
+body.dark-mode .result-description {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Material Icons */
+.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none;
+}
+
+/* 모바일 텍스트 크기 조정 */
+@media (max-width: 768px) {
+    .title {
+        font-size: 2rem;
+    }
+
+    .result-label {
+        font-size: 1rem;
+    }
+
+    .result-description {
+        font-size: 0.775rem;
+    }
+}

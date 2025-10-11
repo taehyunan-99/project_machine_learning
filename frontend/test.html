@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>Recycle Lens</title>
+
+        <!-- Google Fonts -->
+        <link href="https://fonts.googleapis.com" rel="preconnect" />
+        <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+        <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+        <!-- Custom Styles -->
+        <link rel="stylesheet" href="test.css" />
+
+        <!-- JavaScript -->
+        <script type="module" src="test.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <!-- Header -->
+            <header class="header">
+                <a href="#" id="home-logo" class="logo">
+                    <span class="material-symbols-outlined logo-icon">recycling</span>
+                    <h1 class="logo-text">Recycle Lens</h1>
+                </a>
+                <nav class="nav">
+                    <a href="#">통계</a>
+                    <a href="#">문의</a>
+                </nav>
+                <button class="mobile-menu-btn">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+            </header>
+
+            <!-- Main Content -->
+            <main class="main">
+                <div class="content-wrapper">
+                    <h2 class="title">재활용품 분류하기</h2>
+                    <p class="description">
+                        재활용품 이미지를 업로드하거나 실시간으로 촬영하여
+                        인공지능으로 종류를 식별하고 올바른 분리배출 방법을
+                        안내받으세요.
+                    </p>
+
+                    <!-- Upload Area -->
+                    <div class="upload-section">
+                        <label for="image-upload" id="input-area" class="upload-area">
+                            <div id="upload-prompt" class="upload-prompt">
+                                <span class="material-symbols-outlined upload-icon">upload_file</span>
+                                <p class="upload-text">클릭하여 이미지 업로드</p>
+                            </div>
+                            <input id="image-upload" type="file" accept="image/*" class="file-input" />
+                            <div id="image-preview-container" class="image-preview hidden"></div>
+                            <div id="camera-feed-container" class="camera-feed hidden"></div>
+                        </label>
+
+                        <!-- Action Buttons -->
+                        <div class="button-group">
+                            <button id="realtime-btn" class="btn btn-realtime">
+                                <span class="material-symbols-outlined">videocam</span>
+                                실시간 인식
+                            </button>
+                            <button id="analyze-btn" class="btn btn-analyze">
+                                분석 실행
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div id="results-section" class="results-section hidden">
+                        <h3 class="results-title">분류 결과</h3>
+                        <div class="results-card"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </body>
+</html>
