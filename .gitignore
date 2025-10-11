@@ -20,5 +20,8 @@ __pycache__/
 backend/uploads/
 backend/app.db
 
-# Model
+# ignore local weights
+backend/app/model_weights/
+backend/app/static/models/
+*.onnx
 *.pth

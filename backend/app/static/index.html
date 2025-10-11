@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>Recycle Lens • Webcam</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin:16px; }
+    .row { display:flex; gap:12px; align-items:flex-start; flex-wrap:wrap; }
+    video, canvas { width:640px; height:480px; background:#111; border-radius:12px; }
+    .panel { min-width:280px; max-width:640px; flex:1; }
+    button { padding:8px 14px; border-radius:8px; border:1px solid #ccc; background:#fff; cursor:pointer; }
+    #guides { margin-top:8px; line-height:1.5; }
+    .note { color:#666; font-size:12px; }
+  </style>
+</head>
+<body>
+  <h2>웹캠 실시간 인식 (서버 YOLO + 우리팀 참조이미지 매칭)</h2>
+
+  <div class="row">
+    <div>
+      <video id="cam" autoplay playsinline muted width="640" height="480"></video>
+      <canvas id="draw" width="640" height="480"></canvas>
+      <div style="margin-top:8px;">
+        <button id="start">캠 시작</button>
+        <button id="stop">정지</button>
+        <span class="note">프레임을 주기적으로 <code>/infer</code>에 전송합니다.</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>안내 멘트</h3>
+      <div id="guides">대상이 감지되면 여기 표시됩니다.</div>
+      <h4 style="margin-top:24px;">현재 라벨들</h4>
+      <pre id="classes" style="white-space:pre-wrap"></pre>
+    </div>
+  </div>
+
+<script>
+const cam   = document.getElementById('cam');
+const draw  = document.getElementById('draw');
+const ctx   = draw.getContext('2d');
+const startBtn = document.getElementById('start');
+const stopBtn  = document.getElementById('stop');
+const guidesEl = document.getElementById('guides');
+const classesEl= document.getElementById('classes');
+
+let timer = null;
+
+// 서버가 보유한 라벨 리스트 확인(선택)
+fetch('/guides').then(r=>r.json()).then(js=>{
+  classesEl.textContent = Object.keys(js.guides||{}).join(', ') || '(라벨 정보 없음)';
+}).catch(()=>{ classesEl.textContent='불러오기 실패'; });
+
+startBtn.onclick = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { width:640, height:480 }, audio:false });
+    cam.srcObject = stream;
+    // draw 루프 시작
+    if (timer) clearInterval(timer);
+    timer = setInterval(captureAndInfer, 500); // 0.5초 주기
+  } catch (e) {
+    alert('카메라 권한이 필요합니다: ' + e);
+  }
+};
+
+stopBtn.onclick = () => {
+  if (timer) { clearInterval(timer); timer = null; }
+  const s = cam.srcObject;
+  if (s) { s.getTracks().forEach(t=>t.stop()); cam.srcObject = null; }
+  ctx.clearRect(0,0,draw.width,draw.height);
+  guidesEl.innerHTML = '';
+};
+
+async function captureAndInfer() {
+  if (!cam.srcObject) return;
+  // 비디오 프레임을 canvas에 그리기
+  ctx.drawImage(cam, 0, 0, draw.width, draw.height);
+  // 이미지 blob 추출
+  const blob = await new Promise(res => draw.toBlob(res, 'image/jpeg', 0.9));
+
+  const fd = new FormData();
+  fd.append('file', blob, 'frame.jpg');
+
+  let data;
+  try {
+    const r = await fetch('/infer', { method:'POST', body: fd });
+    data = await r.json();
+  } catch (e) {
+    console.warn('infer 실패', e);
+    return;
+  }
+
+  // 결과 그리기
+  ctx.drawImage(cam, 0, 0, draw.width, draw.height);
+  ctx.lineWidth = 2; ctx.font = '14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto';
+  const tips = [];
+
+  const dets = Array.isArray(data) ? data : (data.detections || []);
+  for (const d of dets) {
+    const x1 = Math.round(d.x1 || d.xyxy?.[0] || 0);
+    const y1 = Math.round(d.y1 || d.xyxy?.[1] || 0);
+    const x2 = Math.round(d.x2 || d.xyxy?.[2] || 0);
+    const y2 = Math.round(d.y2 || d.xyxy?.[3] || 0);
+    const w = x2 - x1, h = y2 - y1;
+
+    // 박스
+    ctx.strokeStyle = 'lime';
+    ctx.strokeRect(x1, y1, w, h);
+
+    // 라벨
+    const label = d.match_label || d.label || d.cls || 'object';
+    const conf  = d.match_score ?? d.conf ?? d.score ?? 0;
+    const tag   = `${label} ${(conf*100|0)}%`;
+    const tw = ctx.measureText(tag).width + 8;
+    ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(x1, y1-18, tw, 18);
+    ctx.fillStyle = '#fff'; ctx.fillText(tag, x1+4, y1-4);
+
+    if (d.guide) tips.push(`• ${label}: ${d.guide}`);
+  }
+  guidesEl.innerHTML = tips.join('<br>');
+}
+</script>
+</body>
+</html>
