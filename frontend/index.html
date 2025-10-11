@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recycle Les - 재활용 분류기</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" type=""></script>
+</head>
+<body>
+<header class="site-header">
+    <a href="/frontend/" class="logo-link">
+      <img src="favicon.png" alt="재활용 카메라 아이콘" class="header-icon">
+      <span class="site-title">Recycle Les</span>
+    </a>
+    <ul>
+        <a href=""></a>
+    </ul>
+  </header>
+
+    <main>
+        <section id="upload-section" class="card">
+            <h2>1. 이미지 업로드</h2>
+            <label for="image-upload" class="upload-label">
+                📷 사진 선택하기
+            </label>
+            <input type="file" id="image-upload" accept="image/*">
+            <div id="image-preview-container">
+                <img id="image-preview" src="" alt="선택한 이미지 미리보기">
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>2. 분석 실행하기</h2>
+            <p>사진을 올린 후, 아래 버튼을 눌러 분석을 시작하세요.</p>
+            <button id="run-prediction-btn" disabled>분석 실행</button>
+        </section>
+
+        <section id="result-section" class="card hidden">
+            <h2>3. 분석 결과</h2>
+            <div id="result-card">
+                </div>
+            <div id="guide-card">
+                </div>
+        </section>
+        
+        <section id="feedback-section" class="card hidden">
+            <h2>4. 결과가 정확한가요?</h2>
+            <p>피드백을 남겨주시면 서비스 개선에 큰 도움이 됩니다.</p>
+            <button id="feedback-correct-btn">👍 정확해요</button>
+            <button id="feedback-incorrect-btn">👎 틀려요</button>
+        </section>
+    </main>
+    
+    <div id="loader" class="hidden"></div>
+    <div id="toast"></div>
+
+
+</body>
+</html>

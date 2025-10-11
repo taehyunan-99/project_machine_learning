@@ -1,0 +1,198 @@
+/* 기본 스타일 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    margin: 0;
+    text-align: center;
+}
+
+header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 20px 0;
+}
+
+header h1 {
+    margin: 0;
+}
+
+main {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+/* 카드 UI */
+.card {
+    background-color: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 25px;
+}
+
+/* 1. 업로드 기능 스타일 */
+#image-upload {
+    display: none; /* 실제 input 버튼은 숨김 */
+}
+.upload-label {
+    display: inline-block;
+    padding: 12px 20px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+.upload-label:hover {
+    background-color: #0056b3;
+}
+#image-preview-container {
+    margin-top: 20px;
+    min-height: 100px;
+}
+#image-preview {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+/* 버튼 공통 스타일 */
+button {
+    padding: 12px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: #28a745;
+    color: white;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+button:hover {
+    background-color: #218838;
+}
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* 4. 결과 카드 스타일 */
+#result-card {
+    padding: 20px;
+    border: 2px solid #4CAF50;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+#result-card p {
+    margin: 5px 0;
+    font-size: 18px;
+}
+#result-card .label {
+    font-size: 24px;
+    font-weight: bold;
+}
+#result-card .confidence {
+    color: #555;
+}
+
+/* 5. 배출 요령 카드 스타일 */
+#guide-card {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: left;
+}
+#guide-card h3 {
+    margin-top: 0;
+}
+
+/* 7. 로딩 스피너 및 토스트 메시지 */
+#loader {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: 50px;
+    height: 50px;
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    transform: translate(-50%, -50%);
+}
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+#toast {
+    position: fixed;
+    bottom: -100px; /* 처음엔 숨겨둠 */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: white;
+    padding: 16px;
+    border-radius: 8px;
+    transition: bottom 0.5s ease;
+    z-index: 10;
+}
+#toast.show {
+    bottom: 30px; /* .show 클래스가 추가되면 나타남 */
+}
+
+/* 유틸리티 */
+.hidden {
+    display: none;
+}
+
+/* style.css 파일에 아래 내용 추가 */
+
+.header-icon {
+  height: 3em;  /* 아이콘의 높이를 글자 크기에 맞게 조절합니다. (1em = 글자 크기 1배) */
+  width: auto;    /* 높이에 맞춰 너비는 자동으로 조절되도록 합니다. */
+  vertical-align: middle; /* 아이콘이 텍스트의 중간에 오도록 수직 정렬합니다. */
+  margin-left: 10px; /* 제목 텍스트와 아이콘 사이에 약간의 여백을 줍니다. */
+}
+
+/* style.css 파일에 아래 내용 추가 */
+
+/* 사이트 로고를 담고 있는 헤더 */
+.site-header {
+  padding: 20px;
+  display: flex;
+  justify-content: center; /* 로고를 가운데 정렬 */
+  align-items: center;
+}
+
+/* 로고 링크의 기본 스타일 제거 */
+.logo-link {
+  text-decoration: none; /* 밑줄 제거 */
+  color: #333; /* 글자색 지정 (원하는 색으로 변경 가능) */
+  display: flex; /* 내부 아이콘과 텍스트 정렬을 위해 flex 사용 */
+  align-items: center;
+  gap: 10px; /* 아이콘과 텍스트 사이 간격 */
+}
+
+/* 로고 링크 안의 제목 텍스트 */
+.site-title {
+  font-size: 2em; /* 글자 크기 */
+  font-weight: bold; /* 글자 굵기 */
+}
+
+/* 녹색 배경 배너 스타일 */
+.green-banner {
+  background-color: #4CAF50; /* 예시 녹색 배경 */
+  color: white;
+  padding: 30px;
+  text-align: center;
+}
+
+/* 기존 header-icon 클래스는 그대로 사용 가능합니다. */
+.header-icon {
+  height: 1.2em;
+  vertical-align: middle;
+}
