@@ -1,19 +1,20 @@
 # YOLO + ResNet Model 파이프라인
 
-from model import transform
+from model import test_transform
 from yolo_detector import YOLODetector
 import cv2 as cv
 import torch
 import torchvision.models as models
 import torch.nn as nn
 from PIL import Image
+import os
 
 # 학습이 완료된 모델 가져오기
-model_path = "../backend/models/prototype_model_v1.pth"
+model_path = os.path.join(os.path.dirname(__file__), "../backend/models/model_v4.pth")
 def load_trained_model(model_path=model_path):
-    # 모델 구조
+    # 모델 구조 (7클래스)
     model = models.resnet18(pretrained=False)
-    model.fc = nn.Linear(512, 6)
+    model.fc = nn.Linear(512, 7)  # 6 → 7
     # 학습시킨 가중치 업데이트
     model.load_state_dict(torch.load(model_path, map_location="cpu"))
     model.eval() # 검증 모드
@@ -29,23 +30,25 @@ def load_trained_model(model_path=model_path):
     return model
 
 class YOLOResNetPipeline:
-    # 재활용 분류 매핑 (알파벳 순서: Can, Glass, Paper, Plastic, Styrofoam, Vinyl)
+    # 재활용 분류 매핑 (7클래스)
     recycling_classes = {
         0: {"category": "캔", "item_type": "캔류", "method": "내용물 비우고 캔 전용 수거함"}, # Can
         1: {"category": "유리", "item_type": "유리병", "method": "뚜껑 분리하고 유리 전용 수거함"}, # Glass
         2: {"category": "종이", "item_type": "종이류", "method": "테이프 제거하고 종이 전용 수거함"}, # Paper
-        3: {"category": "플라스틱", "item_type": "플라스틱", "method": "라벨 제거하고 플라스틱 전용 수거함"}, # Plastic
-        4: {"category": "스티로폼", "item_type": "스티로폼", "method": "이물질 제거하고 스티로폼 전용 수거함"}, # Styrofoam
-        5: {"category": "비닐", "item_type": "비닐류", "method": "이물질 제거하고 비닐 전용 수거함"} # Vinyl
+        3: {"category": "플라스틱", "item_type": "플라스틱", "method": "라벨 제거하고 플라스틱 전용 수거함"}, # Plastic_opaque
+        4: {"category": "플라스틱", "item_type": "플라스틱", "method": "라벨 제거하고 플라스틱 전용 수거함"}, # Plastic_pet
+        5: {"category": "스티로폼", "item_type": "스티로폼", "method": "이물질 제거하고 스티로폼 전용 수거함"}, # Styrofoam
+        6: {"category": "비닐", "item_type": "비닐류", "method": "이물질 제거하고 비닐 전용 수거함"} # Vinyl
     }
 
     # 파이프라인 초기화
     def __init__(self):
         # YOLO 초기화
-        self.yolo = YOLODetector()
+        yolo_model_path = os.path.join(os.path.dirname(__file__), "../backend/models/yolo11m.pt")
+        self.yolo = YOLODetector(model_path=yolo_model_path)
         # ResNet 모델 초기화
         self.resnet = load_trained_model()
-        self.transform = transform
+        self.transform = test_transform
 
     # 객체 처리 함수
     def process_object(self, img_path):
@@ -124,7 +127,7 @@ class YOLOResNetPipeline:
                         "category": recycling_info["category"],
                         "item_type": recycling_info["item_type"],
                         "recycling_method": recycling_info["method"],
-                        "confidence": object["confidence"]
+                        "confidence": object["resnet_confidence"]
                     }
                 }
                 recycling_items.append(item)
@@ -162,13 +165,13 @@ class YOLOResNetPipeline:
 # =============테스트 실행=============
 if __name__ == "__main__":
     pipeline = YOLOResNetPipeline()
-    # 테스트할 이미지 파일들
+    # 테스트할 이미지 파일들 (외장하드)
     test_images = [
-        "datasets/pipe_test/test1.jpg",
-        "datasets/pipe_test/test2.jpg",
-        "datasets/pipe_test/test3.jpg",
-        "datasets/pipe_test/test4.jpg",
-        "datasets/pipe_test/test5.jpg"
+        "D:/ml_data/pipe_test/test1.jpg",
+        "D:/ml_data/pipe_test/test2.jpg",
+        "D:/ml_data/pipe_test/test3.jpg",
+        "D:/ml_data/pipe_test/test4.jpg",
+        "D:/ml_data/pipe_test/test5.jpg"
     ]
     print("YOLO + ResNet 파이프라인 종합 테스트 시작")
 
@@ -191,4 +194,6 @@ if __name__ == "__main__":
                 category = item["recycling_info"]["category"]
                 confidence = item["recycling_info"]["confidence"]
                 print(f"   • 객체 {item["item_id"]}: {category} (신뢰도: {confidence:.3f})")
+        print(f"{'='*70}\n")
+        
     print("\n전체 테스트 완료!")

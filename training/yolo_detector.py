@@ -1,18 +1,47 @@
 # YOLO 구현
 
 from ultralytics import YOLO
-import numpy as np
+import os
 
 # 모델 로딩을 한번만 하기 위해 클래스로 구현
 class YOLODetector:
     # YOLO 초기화
-    def __init__(self, model_path="yolo11n.pt"):
+    def __init__(self, model_path=None):
+        if model_path is None:
+            model_path = os.path.join(os.path.dirname(__file__), "yolo11m.pt")
         self.model = YOLO(model_path)
     
+    # 재활용품 관련 클래스 ID
+    RECYCLABLE_CLASSES = {
+        39,  # bottle
+        41,  # cup
+        42,  # fork
+        43,  # knife
+        44,  # spoon
+        45,  # bowl
+        68,  # microwave
+        69,  # oven
+        70,  # toaster
+        71,  # sink
+        72,  # refrigerator
+        73,  # book
+        74,  # clock
+        75,  # vase
+        76,  # scissors
+        77,  # teddy bear
+        78,  # hair drier
+        79,  # toothbrush
+        # 필요시 추가 가능
+    }
+
     # 객체 탐지 함수
-    def detect_objects(self, img_path):
+    def detect_objects(self, img_path, filter_recyclables=True):
         # 이미지 로드 (모델 적용 시 리스트 자동 생성)
-        yolo_results = self.model(img_path)
+        yolo_results = self.model(
+            img_path,
+            conf=0.5, # 신뢰도 50% 이상 객체만 탐지
+            iou=0.5 # 겹치는 박스중 하나만 선택
+        )
         # 이미지 리스트에서 0번 이미지 로드
         detection = yolo_results[0]
         # 객체 정보를 저장할 리스트 생성
@@ -37,6 +66,12 @@ class YOLODetector:
             confidence = box.conf[0].cpu().numpy()
             # 객체의 클래스 정보
             class_id = int(box.cls[0].cpu().numpy())
+
+            # 재활용품 필터링
+            if filter_recyclables and class_id not in self.RECYCLABLE_CLASSES:
+                print(f"무시: {detection.names[class_id]} (재활용품 아님)")
+                continue
+
             # 객체 정보를 딕셔너리로 저장
             object_info = {
                 "bbox" : [int(x1), int(y1), int(x2), int(y2)],
@@ -59,12 +94,12 @@ if __name__ == "__main__":
     detector = YOLODetector()
 
     # 2. 이미지 검출 실행
-    img = "datasets/yolo_test/p6.jpg"
-    results = detector.detect_objects(img)
+    # img = "datasets/yolo_test/p6.jpg"
+    # results = detector.detect_objects(img)
 
-    # 3. 결과 출력
-    print(f"\n=== 최종 결과 ===")
-    print(f"총 {len(results)}개 객체 검출")
+    # # 3. 결과 출력
+    # print(f"\n=== 최종 결과 ===")
+    # print(f"총 {len(results)}개 객체 검출")
 
-    for i, obj in enumerate(results):
-        print(f"객체{i+1} : {obj}")
+    # for i, obj in enumerate(results):
+    #     print(f"객체{i+1} : {obj}")
