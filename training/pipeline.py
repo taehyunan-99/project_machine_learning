@@ -10,7 +10,7 @@ from PIL import Image
 import os
 
 # 학습이 완료된 모델 가져오기
-model_path = os.path.join(os.path.dirname(__file__), "../backend/models/model_v3.pth")
+model_path = os.path.join(os.path.dirname(__file__), "../backend/models/model_v4.pth")
 def load_trained_model(model_path=model_path):
     # 모델 구조 (7클래스)
     model = models.resnet18(pretrained=False)
@@ -127,7 +127,7 @@ class YOLOResNetPipeline:
                         "category": recycling_info["category"],
                         "item_type": recycling_info["item_type"],
                         "recycling_method": recycling_info["method"],
-                        "confidence": object["confidence"]
+                        "confidence": object["resnet_confidence"]
                     }
                 }
                 recycling_items.append(item)
