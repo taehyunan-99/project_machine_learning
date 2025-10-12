@@ -7,9 +7,19 @@
 
         <!-- Google Fonts -->
         <link href="https://fonts.googleapis.com" rel="preconnect" />
-        <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-        <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+        <link
+            crossorigin=""
+            href="https://fonts.gstatic.com"
+            rel="preconnect"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+            rel="stylesheet"
+        />
 
         <!-- Custom Styles -->
         <link rel="stylesheet" href="test.css" />
@@ -22,7 +32,9 @@
             <!-- Header -->
             <header class="header">
                 <a href="#" id="home-logo" class="logo">
-                    <span class="material-symbols-outlined logo-icon">recycling</span>
+                    <span class="material-symbols-outlined logo-icon"
+                        >recycling</span
+                    >
                     <h1 class="logo-text">Recycle Lens</h1>
                 </a>
                 <nav class="nav">
@@ -46,25 +58,87 @@
 
                     <!-- Upload Area -->
                     <div class="upload-section">
-                        <label for="image-upload" id="input-area" class="upload-area">
+                        <label
+                            for="image-upload"
+                            id="input-area"
+                            class="upload-area"
+                        >
                             <div id="upload-prompt" class="upload-prompt">
-                                <span class="material-symbols-outlined upload-icon">upload_file</span>
-                                <p class="upload-text">클릭하여 이미지 업로드</p>
+                                <span
+                                    class="material-symbols-outlined upload-icon"
+                                    >upload_file</span
+                                >
+                                <p class="upload-text">
+                                    클릭하여 이미지 업로드
+                                </p>
                             </div>
-                            <input id="image-upload" type="file" accept="image/*" class="file-input" />
-                            <div id="image-preview-container" class="image-preview hidden"></div>
-                            <div id="camera-feed-container" class="camera-feed hidden"></div>
+                            <input
+                                id="image-upload"
+                                type="file"
+                                accept="image/*"
+                                class="file-input"
+                            />
+                            <div
+                                id="image-preview-container"
+                                class="image-preview hidden"
+                            ></div>
+
+                            <!-- Realtime Camera Container -->
+                            <div
+                                id="camera-feed-container"
+                                class="camera-feed hidden"
+                            >
+                                <video
+                                    id="webcam-video"
+                                    autoplay
+                                    playsinline
+                                ></video>
+                                <canvas id="overlay-canvas"></canvas>
+                            </div>
                         </label>
 
                         <!-- Action Buttons -->
                         <div class="button-group">
                             <button id="realtime-btn" class="btn btn-realtime">
-                                <span class="material-symbols-outlined">videocam</span>
+                                <span class="material-symbols-outlined"
+                                    >videocam</span
+                                >
                                 실시간 인식
                             </button>
                             <button id="analyze-btn" class="btn btn-analyze">
                                 분석 실행
                             </button>
+                        </div>
+
+                        <!-- Realtime Controls (hidden by default) -->
+                        <div
+                            id="realtime-controls"
+                            class="realtime-controls hidden"
+                        >
+                            <button id="pause-btn" class="btn btn-control">
+                                <span class="material-symbols-outlined"
+                                    >pause</span
+                                >
+                                일시정지
+                            </button>
+                            <button id="stop-btn" class="btn btn-control">
+                                <span class="material-symbols-outlined"
+                                    >stop</span
+                                >
+                                중지
+                            </button>
+                            <div class="speed-control">
+                                <label for="speed-slider">분석 주기:</label>
+                                <input
+                                    type="range"
+                                    id="speed-slider"
+                                    min="500"
+                                    max="3000"
+                                    value="1000"
+                                    step="500"
+                                />
+                                <span id="speed-value">1.0초</span>
+                            </div>
                         </div>
                     </div>
 
@@ -72,6 +146,65 @@
                     <div id="results-section" class="results-section hidden">
                         <h3 class="results-title">분류 결과</h3>
                         <div class="results-card"></div>
+                    </div>
+
+                    <!-- Realtime Stats & History -->
+                    <div id="realtime-stats" class="realtime-stats hidden">
+                        <h3 class="section-title">실시간 통계</h3>
+                        <div class="stats-cards">
+                            <div class="stat-card">
+                                <span
+                                    class="material-symbols-outlined stat-icon"
+                                    >analytics</span
+                                >
+                                <div class="stat-content">
+                                    <div
+                                        class="stat-value"
+                                        id="total-detections"
+                                    >
+                                        0
+                                    </div>
+                                    <div class="stat-label">총 탐지</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <span
+                                    class="material-symbols-outlined stat-icon"
+                                    >percent</span
+                                >
+                                <div class="stat-content">
+                                    <div class="stat-value" id="avg-confidence">
+                                        0%
+                                    </div>
+                                    <div class="stat-label">평균 신뢰도</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <span
+                                    class="material-symbols-outlined stat-icon"
+                                    >speed</span
+                                >
+                                <div class="stat-content">
+                                    <div
+                                        class="stat-value"
+                                        id="processing-time"
+                                    >
+                                        0ms
+                                    </div>
+                                    <div class="stat-label">처리 시간</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="section-title">최근 탐지 결과</h3>
+                        <div id="detection-history" class="detection-history">
+                            <div class="no-history">
+                                <span class="material-symbols-outlined"
+                                    >history</span
+                                >
+                                <p>아직 탐지된 객체가 없습니다</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>

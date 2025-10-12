@@ -41,13 +41,43 @@ imageUploadInput.addEventListener("change", (event) => {
     }
 });
 
+// ===== 실시간 인식 기능 =====
+
+// 추가 DOM 요소
+const webcamVideo = document.getElementById("webcam-video");
+const overlayCanvas = document.getElementById("overlay-canvas");
+const buttonGroup = document.querySelector(".button-group");
+const realtimeControls = document.getElementById("realtime-controls");
+const pauseBtn = document.getElementById("pause-btn");
+const stopBtn = document.getElementById("stop-btn");
+const speedSlider = document.getElementById("speed-slider");
+const speedValue = document.getElementById("speed-value");
+const realtimeStats = document.getElementById("realtime-stats");
+const detectionHistory = document.getElementById("detection-history");
+
+// 실시간 인식 상태 변수
+let isRealtimeActive = false;
+let isRealtimePaused = false;
+let realtimeStream = null;
+let analysisInterval = null;
+let lastAnalysisTime = 0;
+let analysisSpeed = 1000; // 기본 1초
+
+// 통계 변수
+let totalDetections = 0;
+let totalConfidence = 0;
+let detectionCount = 0;
+let detectionHistoryList = [];
+
 // 실시간 인식 버튼
-realtimeBtn.addEventListener("click", () => {
-    uploadPrompt.classList.add("hidden");
-    imagePreviewContainer.classList.add("hidden");
-    cameraFeedContainer.classList.remove("hidden");
-    inputArea.classList.remove("image-preview-placeholder");
-    resultsSection.classList.add("hidden");
+realtimeBtn.addEventListener("click", async () => {
+    if (!isRealtimeActive) {
+        // 실시간 모드 시작
+        await startRealtimeMode();
+    } else {
+        // 실시간 모드 종료
+        stopRealtimeMode();
+    }
 });
 
 // 분석 실행 버튼
@@ -148,5 +178,286 @@ inputArea.addEventListener("drop", (event) => {
         imageUploadInput.files = files;
         const changeEvent = new Event("change");
         imageUploadInput.dispatchEvent(changeEvent);
+    }
+});
+
+// ===== 실시간 인식 함수들 =====
+
+// 실시간 모드 시작
+async function startRealtimeMode() {
+    try {
+        // 웹캠 접근 요청
+        realtimeStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" }, // 후면 카메라 우선
+            audio: false
+        });
+
+        // video 요소에 스트림 연결
+        webcamVideo.srcObject = realtimeStream;
+
+        // UI 전환
+        uploadPrompt.classList.add("hidden");
+        imagePreviewContainer.classList.add("hidden");
+        cameraFeedContainer.classList.remove("hidden");
+        resultsSection.classList.add("hidden");
+        realtimeStats.classList.remove("hidden");
+
+        // 클래스 추가 (클릭 방지)
+        inputArea.classList.add("realtime-active");
+        buttonGroup.classList.add("realtime-active");
+
+        // 컨트롤 표시
+        realtimeControls.classList.remove("hidden");
+
+        // 버튼 텍스트 변경
+        realtimeBtn.innerHTML = '<span class="material-symbols-outlined">stop_circle</span>실시간 인식 중지';
+
+        // 상태 변경
+        isRealtimeActive = true;
+
+        // Canvas 크기 설정
+        webcamVideo.addEventListener('loadedmetadata', () => {
+            overlayCanvas.width = webcamVideo.videoWidth;
+            overlayCanvas.height = webcamVideo.videoHeight;
+        });
+
+        // 자동 분석 시작
+        startAnalysisLoop();
+
+    } catch (error) {
+        console.error("웹캠 접근 오류:", error);
+        alert("웹캠에 접근할 수 없습니다. 권한을 확인해주세요.");
+    }
+}
+
+// 실시간 모드 종료
+function stopRealtimeMode() {
+    // 스트림 종료
+    if (realtimeStream) {
+        realtimeStream.getTracks().forEach(track => track.stop());
+        realtimeStream = null;
+    }
+
+    // 분석 루프 종료
+    if (analysisInterval) {
+        clearInterval(analysisInterval);
+        analysisInterval = null;
+    }
+
+    // UI 복원
+    cameraFeedContainer.classList.add("hidden");
+    uploadPrompt.classList.remove("hidden");
+    realtimeControls.classList.add("hidden");
+    realtimeStats.classList.add("hidden");
+
+    inputArea.classList.remove("realtime-active");
+    buttonGroup.classList.remove("realtime-active");
+
+    // 버튼 텍스트 복원
+    realtimeBtn.innerHTML = '<span class="material-symbols-outlined">videocam</span>실시간 인식';
+
+    // 상태 초기화
+    isRealtimeActive = false;
+    isRealtimePaused = false;
+
+    // Canvas 초기화
+    const ctx = overlayCanvas.getContext('2d');
+    ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+}
+
+// 자동 분석 루프
+function startAnalysisLoop() {
+    analysisInterval = setInterval(async () => {
+        if (!isRealtimePaused && isRealtimeActive) {
+            await analyzeCurrentFrame();
+        }
+    }, analysisSpeed);
+}
+
+// 현재 프레임 분석
+async function analyzeCurrentFrame() {
+    if (!webcamVideo.videoWidth) return;
+
+    const startTime = performance.now();
+
+    try {
+        // Canvas에 현재 프레임 그리기
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = webcamVideo.videoWidth;
+        tempCanvas.height = webcamVideo.videoHeight;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(webcamVideo, 0, 0);
+
+        // Blob으로 변환
+        const blob = await new Promise(resolve => tempCanvas.toBlob(resolve, 'image/jpeg', 0.8));
+
+        // FormData 생성
+        const formData = new FormData();
+        formData.append("file", blob, "frame.jpg");
+
+        // API 호출
+        const response = await fetch("http://localhost:8000/predict", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        // 처리 시간 계산
+        const processingTime = Math.round(performance.now() - startTime);
+
+        // 결과 처리
+        if (result.classified_items > 0) {
+            drawDetections(result);
+            updateStats(result, processingTime);
+            addToHistory(result);
+        } else {
+            // 탐지 실패 시 Canvas 초기화
+            const ctx = overlayCanvas.getContext('2d');
+            ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        }
+
+    } catch (error) {
+        console.error("분석 중 오류:", error);
+    }
+}
+
+// 탐지 결과를 Canvas에 그리기
+function drawDetections(apiResponse) {
+    const ctx = overlayCanvas.getContext('2d');
+    ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+
+    // Canvas와 Video 크기 비율 계산
+    const scaleX = overlayCanvas.width / webcamVideo.videoWidth;
+    const scaleY = overlayCanvas.height / webcamVideo.videoHeight;
+
+    apiResponse.recycling_items.forEach(item => {
+        const bbox = item.location.bbox;
+        const category = item.recycling_info.category;
+        const confidence = (item.recycling_info.confidence * 100).toFixed(0);
+
+        // 바운딩 박스 그리기
+        ctx.strokeStyle = '#11d452';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(
+            bbox[0] * scaleX,
+            bbox[1] * scaleY,
+            (bbox[2] - bbox[0]) * scaleX,
+            (bbox[3] - bbox[1]) * scaleY
+        );
+
+        // 라벨 배경
+        ctx.fillStyle = 'rgba(17, 212, 82, 0.9)';
+        const label = `${category} ${confidence}%`;
+        ctx.font = 'bold 16px "Public Sans", sans-serif';
+        const textWidth = ctx.measureText(label).width;
+        ctx.fillRect(bbox[0] * scaleX, bbox[1] * scaleY - 25, textWidth + 10, 25);
+
+        // 라벨 텍스트
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(label, bbox[0] * scaleX + 5, bbox[1] * scaleY - 7);
+    });
+}
+
+// 통계 업데이트
+function updateStats(apiResponse, processingTime) {
+    totalDetections += apiResponse.classified_items;
+
+    apiResponse.recycling_items.forEach(item => {
+        totalConfidence += item.recycling_info.confidence;
+        detectionCount++;
+    });
+
+    const avgConfidence = detectionCount > 0 ? (totalConfidence / detectionCount * 100).toFixed(0) : 0;
+
+    document.getElementById('total-detections').textContent = totalDetections;
+    document.getElementById('avg-confidence').textContent = `${avgConfidence}%`;
+    document.getElementById('processing-time').textContent = `${processingTime}ms`;
+}
+
+// 히스토리에 추가
+function addToHistory(apiResponse) {
+    const now = new Date();
+    const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+    apiResponse.recycling_items.forEach(item => {
+        const category = item.recycling_info.category;
+        const confidence = (item.recycling_info.confidence * 100).toFixed(0);
+
+        const historyItem = {
+            category,
+            confidence,
+            time: timeStr
+        };
+
+        detectionHistoryList.unshift(historyItem);
+
+        // 최대 10개만 유지
+        if (detectionHistoryList.length > 10) {
+            detectionHistoryList.pop();
+        }
+    });
+
+    renderHistory();
+}
+
+// 히스토리 렌더링
+function renderHistory() {
+    if (detectionHistoryList.length === 0) {
+        detectionHistory.innerHTML = `
+            <div class="no-history">
+                <span class="material-symbols-outlined">history</span>
+                <p>아직 탐지된 객체가 없습니다</p>
+            </div>
+        `;
+        return;
+    }
+
+    let historyHTML = '';
+    detectionHistoryList.forEach(item => {
+        historyHTML += `
+            <div class="detection-item">
+                <span class="detection-icon">♻️</span>
+                <div class="detection-info">
+                    <div class="detection-category">${item.category}</div>
+                    <div class="detection-confidence">${item.confidence}%</div>
+                    <div class="detection-time">${item.time}</div>
+                </div>
+            </div>
+        `;
+    });
+
+    detectionHistory.innerHTML = historyHTML;
+}
+
+// 일시정지 버튼
+pauseBtn.addEventListener("click", () => {
+    isRealtimePaused = !isRealtimePaused;
+
+    if (isRealtimePaused) {
+        pauseBtn.innerHTML = '<span class="material-symbols-outlined">play_arrow</span>재개';
+    } else {
+        pauseBtn.innerHTML = '<span class="material-symbols-outlined">pause</span>일시정지';
+    }
+});
+
+// 중지 버튼
+stopBtn.addEventListener("click", () => {
+    stopRealtimeMode();
+});
+
+// 분석 주기 슬라이더
+speedSlider.addEventListener("input", (e) => {
+    analysisSpeed = parseInt(e.target.value);
+    speedValue.textContent = `${(analysisSpeed / 1000).toFixed(1)}초`;
+
+    // 인터벌 재시작
+    if (analysisInterval && isRealtimeActive) {
+        clearInterval(analysisInterval);
+        startAnalysisLoop();
     }
 });

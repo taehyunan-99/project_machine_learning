@@ -273,6 +273,16 @@ body.dark-mode .upload-area:hover {
     transform: translate(-50%, -50%);
 }
 
+/* 실시간 모드일 때 클릭 방지 */
+.upload-area.realtime-active {
+    cursor: default;
+    pointer-events: none;
+}
+
+.upload-area.realtime-active .camera-feed {
+    pointer-events: auto;
+}
+
 /* Drag and drop states */
 .upload-area.drag-over {
     background-color: rgba(255, 255, 255, 0.2);
@@ -346,6 +356,20 @@ body.dark-mode .upload-area.drag-over {
 .btn:disabled {
     background-color: #9ca3af;
     cursor: not-allowed;
+}
+
+/* 실시간 모드일 때 분석 버튼 숨김 */
+.button-group.realtime-active .btn-analyze {
+    display: none;
+}
+
+/* 실시간 모드일 때 실시간 버튼 텍스트 변경 */
+.button-group.realtime-active .btn-realtime {
+    background-color: #dc2626;
+}
+
+.button-group.realtime-active .btn-realtime:hover {
+    background-color: #b91c1c;
 }
 
 /* Results Section */
@@ -438,4 +462,313 @@ body.dark-mode .result-description {
     .result-description {
         font-size: 0.775rem;
     }
+}
+
+/* ===== Realtime Mode Styles ===== */
+
+/* Webcam & Canvas */
+#webcam-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0.75rem;
+}
+
+#overlay-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* Realtime Controls */
+.realtime-controls {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    padding: 1.5rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 0.75rem;
+}
+
+body.dark-mode .realtime-controls {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.realtime-controls.hidden {
+    display: none;
+}
+
+@media (min-width: 640px) {
+    .realtime-controls {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}
+
+.btn-control {
+    background-color: #6b7280;
+    color: white;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+}
+
+@media (hover: hover) {
+    .btn-control:hover {
+        transform: scale(1.05);
+        background-color: #4b5563;
+    }
+}
+
+.btn-control:active {
+    background-color: #374151;
+}
+
+/* Speed Control */
+.speed-control {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.speed-control label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.7);
+}
+
+body.dark-mode .speed-control label {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+#speed-slider {
+    width: 120px;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.1);
+    outline: none;
+    -webkit-appearance: none;
+}
+
+body.dark-mode #speed-slider {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+#speed-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #11d452;
+    cursor: pointer;
+}
+
+#speed-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #11d452;
+    cursor: pointer;
+    border: none;
+}
+
+#speed-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #11d452;
+    min-width: 50px;
+}
+
+/* Realtime Stats */
+.realtime-stats {
+    margin-top: 3rem;
+    width: 100%;
+}
+
+.realtime-stats.hidden {
+    display: none;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1c1c1c;
+    margin-bottom: 1rem;
+}
+
+body.dark-mode .section-title {
+    color: white;
+}
+
+/* Stats Cards */
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode .stat-card {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    color: #11d452;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1c1c1c;
+}
+
+body.dark-mode .stat-value {
+    color: white;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: rgba(0, 0, 0, 0.6);
+    margin-top: 0.25rem;
+}
+
+body.dark-mode .stat-label {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Detection History */
+.detection-history {
+    max-height: 400px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.no-history {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .no-history {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.no-history .material-symbols-outlined {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.detection-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 0.5rem;
+    border-left: 4px solid #11d452;
+    transition: all 0.2s;
+}
+
+body.dark-mode .detection-item {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.detection-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(4px);
+}
+
+body.dark-mode .detection-item:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.detection-icon {
+    font-size: 2rem;
+}
+
+.detection-info {
+    flex: 1;
+}
+
+.detection-category {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1c1c1c;
+}
+
+body.dark-mode .detection-category {
+    color: white;
+}
+
+.detection-confidence {
+    font-size: 0.875rem;
+    color: #11d452;
+    font-weight: 600;
+}
+
+.detection-time {
+    font-size: 0.75rem;
+    color: rgba(0, 0, 0, 0.5);
+    margin-top: 0.25rem;
+}
+
+body.dark-mode .detection-time {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* 스크롤바 스타일 */
+.detection-history::-webkit-scrollbar {
+    width: 8px;
+}
+
+.detection-history::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
+
+body.dark-mode .detection-history::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.detection-history::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+body.dark-mode .detection-history::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.detection-history::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .detection-history::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
