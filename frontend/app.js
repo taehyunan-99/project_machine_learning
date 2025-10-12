@@ -1,270 +1,420 @@
-// DOM(Document Object Model)이 완전히 로드되었을 때 이 안의 코드를 실행합니다.
-document.addEventListener("DOMContentLoaded", () => {
-    const imageUpload = document.getElementById("image-upload");
-    const imagePreview = document.getElementById("image-preview");
-    const runPredictionBtn = document.getElementById("run-prediction-btn");
+// DOM 요소 선택
+const imageUploadInput = document.getElementById("image-upload");
+const realtimeBtn = document.getElementById("realtime-btn");
+const analyzeBtn = document.getElementById("analyze-btn");
+const inputArea = document.getElementById("input-area");
+const uploadPrompt = document.getElementById("upload-prompt");
+const imagePreviewContainer = document.getElementById("image-preview-container");
+const cameraFeedContainer = document.getElementById("camera-feed-container");
+const resultsSection = document.getElementById("results-section");
+const homeLogo = document.getElementById("home-logo");
 
-    const resultSection = document.getElementById("result-section");
-    const resultCard = document.getElementById("result-card");
-    const guideCard = document.getElementById("guide-card");
+// 홈 로고 클릭 이벤트 - 페이지 초기화
+homeLogo.addEventListener("click", (event) => {
+    event.preventDefault();
+    // 이미지 업로드 초기화
+    imageUploadInput.value = "";
+    imagePreviewContainer.style.backgroundImage = "";
+    // UI 초기화
+    uploadPrompt.classList.remove("hidden");
+    imagePreviewContainer.classList.add("hidden");
+    cameraFeedContainer.classList.add("hidden");
+    resultsSection.classList.add("hidden");
+    inputArea.classList.remove("has-image");
+    // 페이지 맨 위로 스크롤
+    window.scrollTo({ top: 0, behavior: "smooth" });
+});
 
-    const feedbackSection = document.getElementById("feedback-section");
-    const feedbackCorrectBtn = document.getElementById("feedback-correct-btn");
-    const feedbackIncorrectBtn = document.getElementById(
-        "feedback-incorrect-btn"
-    );
+// 이미지 업로드 이벤트
+imageUploadInput.addEventListener("change", (event) => {
+    if (event.target.files && event.target.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            imagePreviewContainer.style.backgroundImage = `url('${e.target.result}')`;
+            uploadPrompt.classList.add("hidden");
+            cameraFeedContainer.classList.add("hidden");
+            imagePreviewContainer.classList.remove("hidden");
+            inputArea.classList.remove("image-preview-placeholder");
+            inputArea.classList.add("has-image");
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+});
 
-    const loader = document.getElementById("loader");
-    const toast = document.getElementById("toast");
+// ===== 실시간 인식 기능 =====
 
-    let uploadedFile = null; // 사용자가 업로드한 파일 객체를 저장할 변수
+// 추가 DOM 요소
+const webcamVideo = document.getElementById("webcam-video");
+const overlayCanvas = document.getElementById("overlay-canvas");
+const buttonGroup = document.querySelector(".button-group");
+const realtimeControls = document.getElementById("realtime-controls");
+const speedSlider = document.getElementById("speed-slider");
+const speedValue = document.getElementById("speed-value");
+const realtimeHistory = document.getElementById("realtime-history");
+const detectionHistory = document.getElementById("detection-history");
 
-    // --- 1. 이미지 업로드 & 미리보기 기능 ---
-    imageUpload.addEventListener("change", (event) => {
-        const file = event.target.files[0];
+// 실시간 인식 상태 변수
+let isRealtimeActive = false;
+let realtimeStream = null;
+let analysisInterval = null;
+let lastAnalysisTime = 0;
+let analysisSpeed = 1000; // 기본 1초
 
-        if (file) {
-            uploadedFile = file; // 업로드된 파일 저장
-            imagePreview.src = URL.createObjectURL(file);
-            runPredictionBtn.disabled = false;
-            resultSection.classList.add("hidden");
-            feedbackSection.classList.add("hidden");
-        } else {
-            uploadedFile = null; // 파일 선택 취소 시 초기화
-            imagePreview.src = ""; // 미리보기 제거
-            runPredictionBtn.disabled = true; // 버튼 비활성화
-            showToast("이미지 선택을 취소했습니다.");
-        }
-    });
+// 히스토리 변수
+let detectionHistoryList = [];
 
-    // --- 2 & 3. YOLO 예측 실행 기능 ---
-    runPredictionBtn.addEventListener("click", async () => {
-        if (!uploadedFile) {
-            showToast("먼저 이미지를 선택해주세요.");
-            return;
-        }
+// 실시간 인식 버튼
+realtimeBtn.addEventListener("click", async () => {
+    if (!isRealtimeActive) {
+        // 실시간 모드 시작
+        await startRealtimeMode();
+    } else {
+        // 실시간 모드 종료
+        stopRealtimeMode();
+    }
+});
 
-        showLoader(); // 로딩 스피너 표시
-        runPredictionBtn.disabled = true; // 예측 중에는 버튼 비활성화
-
-        try {
-            // FormData를 사용하여 이미지 파일을 서버로 전송합니다.
-            const formData = new FormData();
-            formData.append("file", uploadedFile); // 'file' = 서버에서 이미지를 받을 때 사용할 이름입니다.
-
-            // YOLO API 엔드포인트
-            const YOLO_API_ENDPOINT = "http://localhost:8000/predict";
-            // ----------------------------------------------------
-
-            const response = await fetch(YOLO_API_ENDPOINT, {
-                method: "POST",
-                body: formData, // 이미지 데이터 전송
-                // 'Content-Type': 'multipart/form-data' 헤더는 FormData 사용 시 자동으로 설정됩니다.
-            });
-
-            // 응답이 성공적인지 확인
-            if (!response.ok) {
-                const errorText = await response.text(); // 서버에서 보낸 에러 메시지를 확인
-                throw new Error(
-                    `Server responded with status ${response.status}: ${errorText}`
-                );
-            }
-
-            const realResult = await response.json(); // 서버에서 JSON 형태로 결과 받아오기
-            console.log("YOLO 분석 결과:", realResult); // 개발자 도구 콘솔에서 결과 확인
-
-            // 백엔드 응답 형식 확인: status와 recycling_items 배열이 있는지 체크
-            if (
-                realResult &&
-                realResult.status === "success" &&
-                realResult.recycling_items
-            ) {
-                // 다중 객체를 처리하는 새 함수 호출
-                displayMultipleResults(realResult);
-            } else {
-                throw new Error("서버 응답 형식이 올바르지 않습니다.");
-            }
-        } catch (error) {
-            console.error("YOLO 분석 중 에러 발생:", error);
-            showToast(
-                "분석 중 오류가 발생했습니다. 다시 시도해 주세요. (" +
-                    error.message +
-                    ")"
-            );
-            // 에러 발생 시 UI 초기화 또는 에러 메시지 표시
-            resultSection.classList.add("hidden");
-            feedbackSection.classList.add("hidden");
-        } finally {
-            hideLoader(); // 로딩 스피너 숨기기
-            runPredictionBtn.disabled = false; // 버튼 다시 활성화
-        }
-    });
-
-    // --- [구버전 백업용 사용X] 결과 카드 & 배출 요령 안내 기능 ---
-    function displayResults(result) {
-        resultCard.innerHTML = `
-            <p>분석 결과</p>
-            <p class="label">${result.label}</p>
-            <p class="confidence">정확도: ${(result.confidence * 100).toFixed(
-                0
-            )}%</p>
-        `;
-
-        if (result.guide) {
-            guideCard.innerHTML = `
-                <h3>${result.guide.title}</h3>
-                <ul>
-                    ${result.guide.steps
-                        .map((step) => `<li>${step}</li>`)
-                        .join("")}
-                </ul>
-            `;
-        } else {
-            guideCard.innerHTML = `<h3>배출 요령을 찾을 수 없습니다.</h3><p>더 많은 정보는 관리자에게 문의하세요.</p>`;
-        }
-
-        resultSection.classList.remove("hidden");
-        feedbackSection.classList.remove("hidden");
+// 분석 실행 버튼
+analyzeBtn.addEventListener("click", async () => {
+    // 파일이 업로드되었는지 확인
+    const file = imageUploadInput.files[0];
+    if (!file) {
+        alert("먼저 이미지를 업로드해주세요.");
+        return;
     }
 
-    // 다중 객체 결과 표시 함수 추가
-    function displayMultipleResults(apiResponse) {
-        // 전체 요약 표시
-        resultCard.innerHTML = `
-            <p>분석 결과</p>
-            <p class="summary">${apiResponse.summary}</p>
-            <p>총 ${apiResponse.total_items}개 객체 탐지 (분류 성공 : ${apiResponse.classified_items}개)</p>
-        `;
+    // FormData 생성
+    const formData = new FormData();
+    formData.append("file", file);
 
-        // 각 객체별 상세 정보 생성
-        let guidesHtml = "";
-        apiResponse.recycling_items.forEach((item) => {
-            const category = item.recycling_info.category;
-            const confidence = item.recycling_info.confidence;
-            const method = item.recycling_info.recycling_method;
-            const detailedGuide = getRecyclingGuide(category);
-
-            guidesHtml += `
-                <div class="item-guide">
-                    <h3>객체 ${item.item_id}: ${category} (${(
-                confidence * 100
-            ).toFixed(0)}%)</h3>
-                    <p><strong>배출 방법:</strong> ${method}</p>
-                    ${
-                        detailedGuide
-                            ? `
-                        <h4>${detailedGuide.title}</h4>
-                        <ul>
-                            ${detailedGuide.steps
-                                .map((step) => `<li>${step}</li>`)
-                                .join("")}
-                        </ul>
-                    `
-                            : ""
-                    }
-                </div>
-                <hr>
-            `;
+    try {
+        // API 호출
+        const response = await fetch("http://localhost:8000/predict", {
+            method: "POST",
+            body: formData,
         });
 
-        guideCard.innerHTML = guidesHtml;
-        resultSection.classList.remove("hidden");
-        feedbackSection.classList.remove("hidden");
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log("분석 결과:", result);
+
+        // 결과 표시
+        displayResults(result);
+        resultsSection.classList.remove("hidden");
+
+    } catch (error) {
+        console.error("분석 중 오류:", error);
+        alert("분석 중 오류가 발생했습니다: " + error.message);
+    }
+});
+
+// 결과 표시 함수
+function displayResults(apiResponse) {
+    const resultsCard = document.querySelector(".results-card");
+
+    if (apiResponse.classified_items === 0) {
+        // 탐지된 객체 없음
+        resultsCard.innerHTML = `
+            <div class="result-header">
+                <span class="result-icon">🔍</span>
+                <div>
+                    <p class="result-label">재활용품을 찾을 수 없습니다</p>
+                    <p class="result-description">다른 각도에서 촬영하거나 더 선명한 이미지를 업로드해주세요.</p>
+                </div>
+            </div>
+        `;
+        return;
     }
 
-    // --- 배출 요령 데이터 (클라이언트에서 관리) ---
-    // 실제 서비스에서는 이 데이터를 서버 API로 받거나, 더 복잡하게 관리할 수 있습니다.
-    const recyclingGuides = {
-        종이: {
-            title: "종이류 배출 요령 📰",
-            steps: [
-                "물기에 젖지 않도록 펴서 차곡차곡 쌓아 묶어서 배출해주세요.",
-                "비닐 코팅된 표지, 공책의 스프링 등은 제거해주세요.",
-                "상자는 테이프, 택배 스티커 등을 모두 제거하고 펼쳐서 배출해주세요.",
-            ],
-        },
-        유리: {
-            title: "유리병 배출 요령 🍾",
-            steps: [
-                "내용물을 깨끗이 비우고 물로 헹궈 배출해주세요.",
-                "담배꽁초 등 이물질을 넣지 말아주세요.",
-                "병뚜껑은 재질에 맞게 분리해서 배출해주세요.",
-                "깨진 유리는 재활용이 어려우니 신문지에 싸서 종량제 봉투로 버려주세요.",
-            ],
-        },
-        캔: {
-            title: "캔류(철/알루미늄) 배출 요령 🥫",
-            steps: [
-                "내용물을 깨끗이 비우고 물로 헹궈 배출해주세요.",
-                "겉에 붙은 플라스틱 뚜껑이나 라벨은 제거해주세요.",
-                "가스 용기(부탄가스, 살충제 등)는 구멍을 뚫어 내용물을 비운 후 배출해주세요.",
-            ],
-        },
-        플라스틱: {
-            title: "플라스틱류 배출 요령 🧴",
-            steps: [
-                "내용물을 비우고 깨끗하게 헹궈주세요.",
-                "페트병과 플라스틱 용기에 붙은 비닐 라벨을 반드시 제거해주세요.",
-                "뚜껑 등 다른 재질로 된 부분은 분리해서 배출해주세요.",
-                "알약 포장재, 칫솔, 장난감 등 여러 재질이 섞인 것은 종량제 봉투로 버려주세요.",
-            ],
-        },
-        비닐: {
-            title: "비닐류 배출 요령 🛍️",
-            steps: [
-                "과자, 라면 봉지 등 모든 비닐은 내용물을 비우고 깨끗하게 헹궈 배출해주세요.",
-                "이물질 제거가 어려운 경우 종량제 봉투로 버려주세요.",
-                "여러 장을 흩날리지 않도록 투명 봉투에 담아 배출해주세요.",
-            ],
-        },
-        스티로폼: {
-            title: "스티로폼 배출 요령 📦",
-            steps: [
-                "내용물을 완전히 비우고, 음식물이 묻어있다면 깨끗하게 세척해주세요.",
-                "테이프, 택배 스티커, 상표 등을 완전히 제거해주세요.",
-                "농수산물 포장에 사용된 스티로폼 상자는 흩날리지 않게 묶어서 배출해주세요.",
-                "이물질 제거가 어렵거나, 컵라면 용기처럼 색이 있거나 코팅된 스티로폼은 종량제 봉투로 버려주세요.",
-            ],
-        },
-        // 다른 재활용품에 대한 가이드를 여기에 추가할 수 있습니다.
-    };
-    function getRecyclingGuide(label) {
-        return (
-            recyclingGuides[label] || {
-                title: `${label} 배출 요령 (정보 없음)`,
-                steps: [
-                    "해당 품목에 대한 자세한 배출 요령을 찾을 수 없습니다.",
-                ],
-            }
+    // 다중 객체 결과 표시
+    let resultsHTML = `<h3 class="results-title">${apiResponse.summary}</h3>`;
+
+    apiResponse.recycling_items.forEach((item) => {
+        const category = item.recycling_info.category;
+        const confidence = (item.recycling_info.confidence * 100).toFixed(0);
+        const method = item.recycling_info.recycling_method;
+
+        resultsHTML += `
+            <div class="result-header">
+                <span class="result-icon">♻️</span>
+                <div>
+                    <p class="result-label">${category} (${confidence}%)</p>
+                    <p class="result-status">재활용 가능</p>
+                </div>
+            </div>
+            <p class="result-description">${method}</p>
+            <hr style="margin: 1rem 0; border: none; border-top: 1px solid rgba(0,0,0,0.1);">
+        `;
+    });
+
+    resultsCard.innerHTML = resultsHTML;
+}
+
+// 드래그 앤 드롭 기능
+inputArea.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    inputArea.classList.add("drag-over");
+});
+
+inputArea.addEventListener("dragleave", (event) => {
+    event.preventDefault();
+    inputArea.classList.remove("drag-over");
+});
+
+inputArea.addEventListener("drop", (event) => {
+    event.preventDefault();
+    inputArea.classList.remove("drag-over");
+    const files = event.dataTransfer.files;
+    if (files && files[0]) {
+        imageUploadInput.files = files;
+        const changeEvent = new Event("change");
+        imageUploadInput.dispatchEvent(changeEvent);
+    }
+});
+
+// ===== 실시간 인식 함수들 =====
+
+// 실시간 모드 시작
+async function startRealtimeMode() {
+    try {
+        // 웹캠 접근 요청
+        realtimeStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" }, // 후면 카메라 우선
+            audio: false
+        });
+
+        // video 요소에 스트림 연결
+        webcamVideo.srcObject = realtimeStream;
+
+        // UI 전환
+        uploadPrompt.classList.add("hidden");
+        imagePreviewContainer.classList.add("hidden");
+        cameraFeedContainer.classList.remove("hidden");
+        resultsSection.classList.add("hidden");
+        realtimeHistory.classList.remove("hidden");
+
+        // 클래스 추가 (클릭 방지)
+        inputArea.classList.add("realtime-active");
+        buttonGroup.classList.add("realtime-active");
+
+        // 컨트롤 표시
+        realtimeControls.classList.remove("hidden");
+
+        // 버튼 텍스트 변경
+        realtimeBtn.innerHTML = '<span class="material-symbols-outlined">stop_circle</span>실시간 인식 중지';
+
+        // 상태 변경 및 히스토리 초기화
+        isRealtimeActive = true;
+        detectionHistoryList = [];
+        renderHistory();
+
+        // Canvas 크기 설정
+        webcamVideo.addEventListener('loadedmetadata', () => {
+            overlayCanvas.width = webcamVideo.videoWidth;
+            overlayCanvas.height = webcamVideo.videoHeight;
+        });
+
+        // 자동 분석 시작
+        startAnalysisLoop();
+
+    } catch (error) {
+        console.error("웹캠 접근 오류:", error);
+        alert("웹캠에 접근할 수 없습니다. 권한을 확인해주세요.");
+    }
+}
+
+// 실시간 모드 종료
+function stopRealtimeMode() {
+    // 스트림 종료
+    if (realtimeStream) {
+        realtimeStream.getTracks().forEach(track => track.stop());
+        realtimeStream = null;
+    }
+
+    // 분석 루프 종료
+    if (analysisInterval) {
+        clearInterval(analysisInterval);
+        analysisInterval = null;
+    }
+
+    // UI 복원
+    cameraFeedContainer.classList.add("hidden");
+    uploadPrompt.classList.remove("hidden");
+    realtimeControls.classList.add("hidden");
+    realtimeHistory.classList.add("hidden");
+
+    inputArea.classList.remove("realtime-active");
+    buttonGroup.classList.remove("realtime-active");
+
+    // 버튼 텍스트 복원
+    realtimeBtn.innerHTML = '<span class="material-symbols-outlined">videocam</span>실시간 인식';
+
+    // 상태 초기화
+    isRealtimeActive = false;
+
+    // Canvas 초기화
+    const ctx = overlayCanvas.getContext('2d');
+    ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+}
+
+// 자동 분석 루프
+function startAnalysisLoop() {
+    analysisInterval = setInterval(async () => {
+        if (isRealtimeActive) {
+            await analyzeCurrentFrame();
+        }
+    }, analysisSpeed);
+}
+
+// 현재 프레임 분석
+async function analyzeCurrentFrame() {
+    if (!webcamVideo.videoWidth) return;
+
+    try {
+        // Canvas에 현재 프레임 그리기
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = webcamVideo.videoWidth;
+        tempCanvas.height = webcamVideo.videoHeight;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(webcamVideo, 0, 0);
+
+        // Blob으로 변환
+        const blob = await new Promise(resolve => tempCanvas.toBlob(resolve, 'image/jpeg', 0.8));
+
+        // FormData 생성
+        const formData = new FormData();
+        formData.append("file", blob, "frame.jpg");
+
+        // API 호출
+        const response = await fetch("http://localhost:8000/predict", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        // 결과 처리
+        if (result.classified_items > 0) {
+            drawDetections(result);
+            addToHistory(result);
+        } else {
+            // 탐지 실패 시 Canvas 초기화
+            const ctx = overlayCanvas.getContext('2d');
+            ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        }
+
+    } catch (error) {
+        console.error("분석 중 오류:", error);
+    }
+}
+
+// 탐지 결과를 Canvas에 그리기
+function drawDetections(apiResponse) {
+    const ctx = overlayCanvas.getContext('2d');
+    ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+
+    // Canvas와 Video 크기 비율 계산
+    const scaleX = overlayCanvas.width / webcamVideo.videoWidth;
+    const scaleY = overlayCanvas.height / webcamVideo.videoHeight;
+
+    apiResponse.recycling_items.forEach(item => {
+        const bbox = item.location.bbox;
+        const category = item.recycling_info.category;
+        const confidence = (item.recycling_info.confidence * 100).toFixed(0);
+
+        // 바운딩 박스 그리기
+        ctx.strokeStyle = '#11d452';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(
+            bbox[0] * scaleX,
+            bbox[1] * scaleY,
+            (bbox[2] - bbox[0]) * scaleX,
+            (bbox[3] - bbox[1]) * scaleY
         );
-    }
 
-    // --- 6. 피드백 저장 기능 ---
-    feedbackCorrectBtn.addEventListener("click", () => {
-        // 실제로는 서버에 피드백 데이터를 전송합니다.
-        showToast("피드백 감사합니다!");
-        feedbackSection.classList.add("hidden");
+        // 라벨 배경
+        ctx.fillStyle = 'rgba(17, 212, 82, 0.9)';
+        const label = `${category} ${confidence}%`;
+        ctx.font = 'bold 16px "Public Sans", sans-serif';
+        const textWidth = ctx.measureText(label).width;
+        ctx.fillRect(bbox[0] * scaleX, bbox[1] * scaleY - 25, textWidth + 10, 25);
+
+        // 라벨 텍스트
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(label, bbox[0] * scaleX + 5, bbox[1] * scaleY - 7);
+    });
+}
+
+// 히스토리에 추가
+function addToHistory(apiResponse) {
+    const now = new Date();
+    const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+    apiResponse.recycling_items.forEach(item => {
+        const category = item.recycling_info.category;
+        const confidence = (item.recycling_info.confidence * 100).toFixed(0);
+
+        const historyItem = {
+            category,
+            confidence,
+            time: timeStr
+        };
+
+        detectionHistoryList.unshift(historyItem);
+
+        // 최대 10개만 유지
+        if (detectionHistoryList.length > 10) {
+            detectionHistoryList.pop();
+        }
     });
 
-    feedbackIncorrectBtn.addEventListener("click", () => {
-        showToast("피드백 감사합니다! 더 발전하는 모델이 될게요.");
-        feedbackSection.classList.add("hidden");
+    renderHistory();
+}
+
+// 히스토리 렌더링
+function renderHistory() {
+    if (detectionHistoryList.length === 0) {
+        detectionHistory.innerHTML = `
+            <div class="no-history">
+                <span class="material-symbols-outlined">history</span>
+                <p>아직 탐지된 객체가 없습니다</p>
+            </div>
+        `;
+        return;
+    }
+
+    let historyHTML = '';
+    detectionHistoryList.forEach(item => {
+        historyHTML += `
+            <div class="detection-item">
+                <span class="detection-icon">♻️</span>
+                <div class="detection-info">
+                    <div class="detection-category">${item.category}</div>
+                    <div class="detection-confidence">${item.confidence}%</div>
+                    <div class="detection-time">${item.time}</div>
+                </div>
+            </div>
+        `;
     });
 
-    // --- 7. 로딩/에러 UX (헬퍼 함수) ---
-    function showLoader() {
-        loader.classList.remove("hidden");
-    }
+    detectionHistory.innerHTML = historyHTML;
+}
 
-    function hideLoader() {
-        loader.classList.add("hidden");
-    }
+// 분석 주기 슬라이더
+speedSlider.addEventListener("input", (e) => {
+    analysisSpeed = parseInt(e.target.value);
+    speedValue.textContent = `${(analysisSpeed / 1000).toFixed(1)}초`;
 
-    function showToast(message) {
-        toast.textContent = message;
-        toast.classList.add("show");
-        setTimeout(() => {
-            toast.classList.remove("show");
-        }, 3000);
+    // 인터벌 재시작
+    if (analysisInterval && isRealtimeActive) {
+        clearInterval(analysisInterval);
+        startAnalysisLoop();
     }
 });
