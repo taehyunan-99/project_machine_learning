@@ -105,6 +105,11 @@ analyzeBtn.addEventListener("click", async () => {
         displayResults(result);
         resultsSection.classList.remove("hidden");
 
+        // 서버에 통계 데이터 저장 (분류된 항목이 있을 때만)
+        if (result.classified_items > 0) {
+            saveAnalysisToServer(result);
+        }
+
     } catch (error) {
         console.error("분석 중 오류:", error);
         alert("분석 중 오류가 발생했습니다: " + error.message);
@@ -304,6 +309,8 @@ async function analyzeCurrentFrame() {
         if (result.classified_items > 0) {
             drawDetections(result);
             addToHistory(result);
+
+            // 실시간 인식은 통계에 저장하지 않음 (정확한 통계를 위해)
         } else {
             // 탐지 실패 시 Canvas 초기화
             const ctx = overlayCanvas.getContext('2d');
@@ -418,3 +425,29 @@ speedSlider.addEventListener("input", (e) => {
         startAnalysisLoop();
     }
 });
+
+// ===== 서버 API 호출 함수 =====
+
+// 분석 결과를 서버에 저장
+async function saveAnalysisToServer(result) {
+    try {
+        const response = await fetch("http://localhost:8000/api/stats", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(result)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("✅ 통계 데이터 저장 완료:", data.message);
+
+    } catch (error) {
+        console.error("❌ 통계 저장 오류:", error);
+        // 저장 실패해도 사용자 경험에는 영향 없음
+    }
+}
