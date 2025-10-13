@@ -32,13 +32,13 @@ def load_trained_model(model_path=model_path):
 class YOLOResNetPipeline:
     # 재활용 분류 매핑 (7클래스)
     recycling_classes = {
-        0: {"category": "캔", "item_type": "캔류", "method": "내용물 비우고 캔 전용 수거함"}, # Can
-        1: {"category": "유리", "item_type": "유리병", "method": "뚜껑 분리하고 유리 전용 수거함"}, # Glass
-        2: {"category": "종이", "item_type": "종이류", "method": "테이프 제거하고 종이 전용 수거함"}, # Paper
-        3: {"category": "플라스틱", "item_type": "플라스틱", "method": "라벨 제거하고 플라스틱 전용 수거함"}, # Plastic_opaque
-        4: {"category": "플라스틱", "item_type": "플라스틱", "method": "라벨 제거하고 플라스틱 전용 수거함"}, # Plastic_pet
-        5: {"category": "스티로폼", "item_type": "스티로폼", "method": "이물질 제거하고 스티로폼 전용 수거함"}, # Styrofoam
-        6: {"category": "비닐", "item_type": "비닐류", "method": "이물질 제거하고 비닐 전용 수거함"} # Vinyl
+        0: {"category": "캔", "item_type": "캔류", "method": "내용물을 비우고 캔 전용 수거함에 버리세요!"}, # Can
+        1: {"category": "유리", "item_type": "유리병", "method": "뚜껑을 분리하고 유리 전용 수거함에 버리세요!"}, # Glass
+        2: {"category": "종이", "item_type": "종이류", "method": "테이프를 제거하고 종이 전용 수거함에 버리세요!"}, # Paper
+        3: {"category": "플라스틱", "item_type": "플라스틱", "method": "라벨을 제거하고 플라스틱 전용 수거함에 버리세요!"}, # Plastic_opaque
+        4: {"category": "플라스틱", "item_type": "플라스틱", "method": "라벨을 제거하고 플라스틱 전용 수거함에 버리세요!"}, # Plastic_pet
+        5: {"category": "스티로폼", "item_type": "스티로폼", "method": "이물질을 제거하고 스티로폼 전용 수거함에 버리세요!"}, # Styrofoam
+        6: {"category": "비닐", "item_type": "비닐류", "method": "이물질을 제거하고 비닐 전용 수거함에 버리세요!"} # Vinyl
     }
 
     # 파이프라인 초기화
@@ -60,8 +60,8 @@ class YOLOResNetPipeline:
             print("이미지를 로드할 수 없습니다!")
             return []
         
-        # YOLO 객체 검출
-        yolo_results = self.yolo.detect_objects(img_path)
+        # YOLO 객체 검출 (필터링 비활성화하여 모든 객체 탐지)
+        yolo_results = self.yolo.detect_objects(img_path, filter_recyclables=False)
         print(f"YOLO 검출 완료: {len(yolo_results)}개 객체")
 
         # 객체 부분만 자르기
@@ -99,7 +99,8 @@ class YOLOResNetPipeline:
                 confidence = prob[predicted_class].item()
 
                 # 결과 출력
-                print(f"ResNet18 분류: 클래스 {predicted_class}, 신뢰도 {confidence:.3f}")
+                class_name = self.recycling_classes[predicted_class]["category"]
+                print(f"ResNet18 분류: {class_name} (클래스 {predicted_class}), 신뢰도 {confidence:.3f}")
 
                 # YOLO결과 + ResNet18 결과
                 box["resnet_class"] = predicted_class
