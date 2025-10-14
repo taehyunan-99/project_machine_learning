@@ -12,4 +12,4 @@ requests>=2.31.0
 ultralytics>=8.0.0
 
 # 이미지 처리
-Pillow>=10.0.
+Pillow>=10.0
