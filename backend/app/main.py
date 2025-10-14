@@ -21,8 +21,7 @@ import os
 allowed_origins = [
     "http://localhost:8080",
     "http://127.0.0.1:8080",
-    # Vercel 배포 후 여기에 실제 도메인 추가
-    # "https://your-app.vercel.app",
+    "https://project-machine-learning-msdt41gv5-taehyunans-projects.vercel.app",
 ]
 
 # 개발 환경에서는 모든 origin 허용
