@@ -10,12 +10,14 @@ requests>=2.31.0
 
 # 이미지 처리
 Pillow>=10.0.0
-opencv-python-headless>=4.5.0
 
 # PyTorch CPU 버전 (가벼운 버전)
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch>=2.0.0
 torchvision>=0.15.0
 
-# YOLOv8
+# OpenCV headless (GUI 라이브러리 불필요)
+opencv-python-headless>=4.5.0
+
+# YOLOv8 (opencv-python 의존성 제외)
 ultralytics>=8.0.0
