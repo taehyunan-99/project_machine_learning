@@ -10,7 +10,7 @@ from PIL import Image
 import os
 
 # 학습이 완료된 모델 가져오기
-model_path = os.path.join(os.path.dirname(__file__), "../backend/models/model_v4.pth")
+model_path = os.path.join(os.path.dirname(__file__), "../models/model_v4.pth")
 def load_trained_model(model_path=model_path):
     # 모델 구조 (7클래스)
     model = models.resnet18(pretrained=False)
@@ -44,7 +44,7 @@ class YOLOResNetPipeline:
     # 파이프라인 초기화
     def __init__(self):
         # YOLO 초기화
-        yolo_model_path = os.path.join(os.path.dirname(__file__), "../backend/models/yolo11m.pt")
+        yolo_model_path = os.path.join(os.path.dirname(__file__), "../models/yolo11m.pt")
         self.yolo = YOLODetector(model_path=yolo_model_path)
         # ResNet 모델 초기화
         self.resnet = load_trained_model()
@@ -164,37 +164,37 @@ class YOLOResNetPipeline:
         return response
 
 # =============테스트 실행=============
-if __name__ == "__main__":
-    pipeline = YOLOResNetPipeline()
-    # 테스트할 이미지 파일들 (외장하드)
-    test_images = [
-        "D:/ml_data/pipe_test/test1.jpg",
-        "D:/ml_data/pipe_test/test2.jpg",
-        "D:/ml_data/pipe_test/test3.jpg",
-        "D:/ml_data/pipe_test/test4.jpg",
-        "D:/ml_data/pipe_test/test5.jpg"
-    ]
-    print("YOLO + ResNet 파이프라인 종합 테스트 시작")
+# if __name__ == "__main__":
+#     pipeline = YOLOResNetPipeline()
+#     # 테스트할 이미지 파일들 (외장하드)
+#     test_images = [
+#         "D:/ml_data/pipe_test/test1.jpg",
+#         "D:/ml_data/pipe_test/test2.jpg",
+#         "D:/ml_data/pipe_test/test3.jpg",
+#         "D:/ml_data/pipe_test/test4.jpg",
+#         "D:/ml_data/pipe_test/test5.jpg"
+#     ]
+#     print("YOLO + ResNet 파이프라인 종합 테스트 시작")
 
-    for idx, img_path in enumerate(test_images):
-        print(f"\n테스트 {idx+1}/5: {img_path}")
-        # 파이프라인 실행
-        results = pipeline.process_object(img_path)
-        # API 응답 생성
-        api_response = pipeline.format_recycling_response(results, img_path)
-        # 결과 요약 출력
-        print(f"\n결과 요약:")
-        print(f"   • YOLO 탐지: {len(results)}개 객체")
-        print(f"   • 분류 완료: {api_response["classified_items"]}개")
-        print(f"   • 미분류: {api_response["unclassified_items"]}개")
-        print(f"   • 요약: {api_response["summary"]}")
-        # 상세 분류 결과
-        if api_response["recycling_items"]:
-            print(f"\n분류 결과:")
-            for item in api_response["recycling_items"]:
-                category = item["recycling_info"]["category"]
-                confidence = item["recycling_info"]["confidence"]
-                print(f"   • 객체 {item["item_id"]}: {category} (신뢰도: {confidence:.3f})")
-        print(f"{'='*70}\n")
+#     for idx, img_path in enumerate(test_images):
+#         print(f"\n테스트 {idx+1}/5: {img_path}")
+#         # 파이프라인 실행
+#         results = pipeline.process_object(img_path)
+#         # API 응답 생성
+#         api_response = pipeline.format_recycling_response(results, img_path)
+#         # 결과 요약 출력
+#         print(f"\n결과 요약:")
+#         print(f"   • YOLO 탐지: {len(results)}개 객체")
+#         print(f"   • 분류 완료: {api_response["classified_items"]}개")
+#         print(f"   • 미분류: {api_response["unclassified_items"]}개")
+#         print(f"   • 요약: {api_response["summary"]}")
+#         # 상세 분류 결과
+#         if api_response["recycling_items"]:
+#             print(f"\n분류 결과:")
+#             for item in api_response["recycling_items"]:
+#                 category = item["recycling_info"]["category"]
+#                 confidence = item["recycling_info"]["confidence"]
+#                 print(f"   • 객체 {item["item_id"]}: {category} (신뢰도: {confidence:.3f})")
+#         print(f"{'='*70}\n")
         
-    print("\n전체 테스트 완료!")
+#     print("\n전체 테스트 완료!")
