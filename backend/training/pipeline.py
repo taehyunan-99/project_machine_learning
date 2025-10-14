@@ -1,7 +1,7 @@
 # YOLO + ResNet Model 파이프라인
 
-from model import test_transform
-from yolo_detector import YOLODetector
+from training.model import test_transform
+from training.yolo_detector import YOLODetector
 import cv2 as cv
 import torch
 import torchvision.models as models
