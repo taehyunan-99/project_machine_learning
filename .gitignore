@@ -3,7 +3,6 @@ datasets/
 data/
 runs/
 weights/
-*.pt
 *.onnx
 *.ckpt
 
@@ -28,5 +27,7 @@ backend/app.db
 # ignore local weights
 backend/app/model_weights/
 backend/app/static/models/
-*.onnx
-*.pth
+
+# 배포용 모델은 포함
+!backend/models/*.pt
+!backend/models/*.pth
