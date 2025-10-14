@@ -7,9 +7,8 @@ function getApiUrl() {
         return 'http://localhost:8000';
     }
 
-    // Vercel 프로덕션 환경
-    // 배포 후 실제 백엔드 URL로 변경 필요
-    return '/api';  // Vercel Serverless Functions 사용 시
+    // Vercel 프로덕션 환경 - Railway 백엔드 URL
+    return 'https://projectmachinelearning-production.up.railway.app';
 }
 
 const API_BASE_URL = getApiUrl();
