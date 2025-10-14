@@ -1,0 +1,6 @@
+[build]
+builder = "DOCKER"
+watchPatterns = ["backend/**"]
+
+[[services]]
+rootDirectory = "backend"

@@ -1,0 +1,24 @@
+# 웹 프레임워크
+fastapi
+uvicorn[standard]
+python-multipart
+
+# 환경 변수
+python-dotenv
+
+# HTTP 클라이언트
+requests
+
+# 이미지 처리
+Pillow
+
+# PyTorch CPU 버전 (가벼운 버전)
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
+
+# OpenCV headless (먼저 설치)
+opencv-python-headless
+
+# YOLOv8
+ultralytics
