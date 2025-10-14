@@ -1,23 +1,23 @@
 # 웹 프레임워크
-fastapi>=0.100.0
-uvicorn[standard]>=0.23.0
+fastapi
+uvicorn[standard]
 
 # 환경 변수
-python-dotenv>=1.0.0
+python-dotenv
 
 # HTTP 클라이언트
-requests>=2.31.0
+requests
 
 # 이미지 처리
-Pillow>=10.0.0
+Pillow
 
 # PyTorch CPU 버전 (가벼운 버전)
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch>=2.0.0
-torchvision>=0.15.0
+torch
+torchvision
 
 # OpenCV headless (GUI 라이브러리 불필요)
-opencv-python-headless>=4.5.0
+opencv-python-headless
 
-# YOLOv8 (opencv-python 의존성 제외)
-ultralytics>=8.0.0
+# YOLOv8
+ultralytics
