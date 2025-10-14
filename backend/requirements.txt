@@ -1,6 +1,7 @@
 # 웹 프레임워크
 fastapi
 uvicorn[standard]
+python-multipart
 
 # 환경 변수
 python-dotenv
