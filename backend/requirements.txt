@@ -10,6 +10,7 @@ requests>=2.31.0
 
 # 이미지 처리
 Pillow>=10.0.0
+opencv-python-headless>=4.5.0
 
 # PyTorch CPU 버전 (가벼운 버전)
 --extra-index-url https://download.pytorch.org/whl/cpu
