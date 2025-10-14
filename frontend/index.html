@@ -1,61 +1,155 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
     <head>
-        <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recycle Les - 재활용 분류기</title>
-    <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="stylesheet" href="style.css">
-    <script src="app.js" type=""></script>
-</head>
-<body>
-<header class="site-header">
-    <a href="/frontend/" class="logo-link">
-      <img src="favicon.png" alt="재활용 카메라 아이콘" class="header-icon">
-      <span class="site-title">Recycle Les</span>
-    </a>
-    <ul>
-        <a href=""></a>
-    </ul>
-  </header>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>Recycle Lens</title>
 
-    <main>
-        <section id="upload-section" class="card">
-            <h2>1. 이미지 업로드</h2>
-            <label for="image-upload" class="upload-label">
-                📷 사진 선택하기
-            </label>
-            <input type="file" id="image-upload" accept="image/*">
-            <div id="image-preview-container">
-                <img id="image-preview" src="" alt="선택한 이미지 미리보기">
-            </div>
-        </section>
+        <!-- Google Fonts -->
+        <link href="https://fonts.googleapis.com" rel="preconnect" />
+        <link
+            crossorigin=""
+            href="https://fonts.gstatic.com"
+            rel="preconnect"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+            rel="stylesheet"
+        />
 
-        <section class="card">
-            <h2>2. 분석 실행하기</h2>
-            <p>사진을 올린 후, 아래 버튼을 눌러 분석을 시작하세요.</p>
-            <button id="run-prediction-btn" disabled>분석 실행</button>
-        </section>
+        <!-- Custom Styles -->
+        <link rel="stylesheet" href="style.css" />
 
-        <section id="result-section" class="card hidden">
-            <h2>3. 분석 결과</h2>
-            <div id="result-card">
+        <!-- JavaScript -->
+        <script type="module" src="app.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <!-- Header -->
+            <header class="header">
+                <a href="#" id="home-logo" class="logo">
+                    <span class="material-symbols-outlined logo-icon"
+                        >recycling</span
+                    >
+                    <h1 class="logo-text">Recycle Lens</h1>
+                </a>
+                <nav class="nav">
+                    <a href="#">통계</a>
+                    <a href="#">문의</a>
+                </nav>
+                <button class="mobile-menu-btn">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+            </header>
+
+            <!-- Main Content -->
+            <main class="main">
+                <div class="content-wrapper">
+                    <h2 class="title">재활용품 분류하기</h2>
+                    <p class="description">
+                        재활용품 이미지를 업로드하거나 실시간으로 촬영하여
+                        인공지능으로 종류를 식별하고 올바른 분리배출 방법을
+                        안내받으세요.
+                    </p>
+
+                    <!-- Upload Area -->
+                    <div class="upload-section">
+                        <label
+                            for="image-upload"
+                            id="input-area"
+                            class="upload-area"
+                        >
+                            <div id="upload-prompt" class="upload-prompt">
+                                <span
+                                    class="material-symbols-outlined upload-icon"
+                                    >upload_file</span
+                                >
+                                <p class="upload-text">
+                                    클릭하여 이미지 업로드
+                                </p>
+                            </div>
+                            <input
+                                id="image-upload"
+                                type="file"
+                                accept="image/*"
+                                class="file-input"
+                            />
+                            <div
+                                id="image-preview-container"
+                                class="image-preview hidden"
+                            ></div>
+
+                            <!-- Realtime Camera Container -->
+                            <div
+                                id="camera-feed-container"
+                                class="camera-feed hidden"
+                            >
+                                <video
+                                    id="webcam-video"
+                                    autoplay
+                                    playsinline
+                                ></video>
+                                <canvas id="overlay-canvas"></canvas>
+                            </div>
+                        </label>
+
+                        <!-- Action Buttons -->
+                        <div class="button-group">
+                            <button id="realtime-btn" class="btn btn-realtime">
+                                <span class="material-symbols-outlined"
+                                    >videocam</span
+                                >
+                                실시간 인식
+                            </button>
+                            <button id="analyze-btn" class="btn btn-analyze">
+                                분석 실행
+                            </button>
+                        </div>
+
+                        <!-- Realtime Controls (hidden by default) -->
+                        <div
+                            id="realtime-controls"
+                            class="realtime-controls hidden"
+                        >
+                            <div class="speed-control">
+                                <label for="speed-slider">분석 주기:</label>
+                                <input
+                                    type="range"
+                                    id="speed-slider"
+                                    min="1000"
+                                    max="3000"
+                                    value="1000"
+                                    step="500"
+                                />
+                                <span id="speed-value">1.0초</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div id="results-section" class="results-section hidden">
+                        <h3 class="results-title">분류 결과</h3>
+                        <div class="results-card"></div>
+                    </div>
+
+                    <!-- Realtime History -->
+                    <div id="realtime-history" class="realtime-history hidden">
+                        <h3 class="section-title">최근 탐지 결과</h3>
+                        <div id="detection-history" class="detection-history">
+                            <div class="no-history">
+                                <span class="material-symbols-outlined"
+                                    >history</span
+                                >
+                                <p>아직 탐지된 객체가 없습니다</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            <div id="guide-card">
-                </div>
-        </section>
-        
-        <section id="feedback-section" class="card hidden">
-            <h2>4. 결과가 정확한가요?</h2>
-            <p>피드백을 남겨주시면 서비스 개선에 큰 도움이 됩니다.</p>
-            <button id="feedback-correct-btn">👍 정확해요</button>
-            <button id="feedback-incorrect-btn">👎 틀려요</button>
-        </section>
-    </main>
-    
-    <div id="loader" class="hidden"></div>
-    <div id="toast"></div>
-
-
-</body>
+            </main>
+        </div>
+    </body>
 </html>
