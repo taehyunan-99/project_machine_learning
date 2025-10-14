@@ -2,14 +2,19 @@
 fastapi>=0.100.0
 uvicorn[standard]>=0.23.0
 
-# 환경 변수 관리
+# 환경 변수
 python-dotenv>=1.0.0
 
-# HTTP 클라이언트 (Turso API 호출용)
+# HTTP 클라이언트
 requests>=2.31.0
 
-# AI 모델 (YOLOv8)
-ultralytics>=8.0.0
-
 # 이미지 처리
-Pillow>=10.0
+Pillow>=10.0.0
+
+# PyTorch CPU (가벼운 버전)
+torch>=2.0.0+cpu
+torchvision>=0.15.0+cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+# YOLOv8
+ultralytics>=8.0.0
