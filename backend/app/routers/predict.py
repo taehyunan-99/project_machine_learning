@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File
 import os, sys, tempfile
 
 # 파이프라인 import를 위한 경로 설정
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "training")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "training")))
 from pipeline import YOLOResNetPipeline
 
 router = APIRouter(tags=["predict"])
