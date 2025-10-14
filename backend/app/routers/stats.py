@@ -42,28 +42,24 @@ async def save_analysis(data: AnalysisRequest):
     }
     """
     try:
-        with get_db() as conn:
-            cursor = conn.cursor()
-
+        with get_db() as client:
             # 분석 기록 저장
-            cursor.execute("""
+            client.execute("""
                 INSERT INTO analysis_records (timestamp, total_items)
                 VALUES (?, ?)
-            """, (datetime.now().isoformat(), data.classified_items))
+            """, [datetime.now().isoformat(), data.classified_items])
 
-            analysis_id = cursor.lastrowid
+            analysis_id = client.lastrowid
 
             # 탐지된 항목들 저장
             for item in data.recycling_items:
                 category = item["recycling_info"]["category"]
                 confidence = item["recycling_info"]["confidence"]
 
-                cursor.execute("""
+                client.execute("""
                     INSERT INTO detected_items (analysis_id, category, confidence)
                     VALUES (?, ?, ?)
-                """, (analysis_id, category, confidence))
-
-            conn.commit()
+                """, [analysis_id, category, confidence])
 
             return {
                 "status": "success",
@@ -92,19 +88,22 @@ async def get_stats():
     }
     """
     try:
-        with get_db() as conn:
-            cursor = conn.cursor()
-
+        with get_db() as client:
             # 총 분석 횟수
-            cursor.execute("SELECT COUNT(*) FROM analysis_records")
-            total_analyses = cursor.fetchone()[0]
+            client.execute("SELECT COUNT(*) FROM analysis_records")
+            total_analyses = int(client.fetchone()[0])
 
             # 총 탐지 항목 수
-            cursor.execute("SELECT COUNT(*) FROM detected_items")
-            total_items = cursor.fetchone()[0]
+            client.execute("SELECT COUNT(*) FROM detected_items")
+            total_items = int(client.fetchone()[0])
+
+            # 평균 신뢰도 (정확도)
+            client.execute("SELECT AVG(confidence) FROM detected_items")
+            avg_confidence = client.fetchone()[0]
+            avg_accuracy = round(float(avg_confidence) * 100, 1) if avg_confidence else 0
 
             # 카테고리별 개수
-            cursor.execute("""
+            client.execute("""
                 SELECT category, COUNT(*) as count
                 FROM detected_items
                 GROUP BY category
@@ -119,12 +118,13 @@ async def get_stats():
                 "비닐": 0
             }
 
-            for row in cursor.fetchall():
-                category_counts[row[0]] = row[1]
+            for row in client.fetchall():
+                category_counts[row[0]] = int(row[1])
 
             return {
                 "total_analyses": total_analyses,
                 "total_items": total_items,
+                "avg_accuracy": avg_accuracy,
                 "category_counts": category_counts
             }
 
@@ -139,32 +139,72 @@ async def get_daily_stats(days: int = 7):
 
     파라미터:
     - days: 조회할 일수 (기본 7일)
+
+    응답:
+    - days=1 or 7: 클래스별 통계
+    - days=30: 전체 분석 횟수만
     """
     try:
-        with get_db() as conn:
-            cursor = conn.cursor()
+        with get_db() as client:
+            # days=1이면 오늘만, days>1이면 (days-1)일 전부터
+            adjusted_days = 0 if days == 1 else days - 1
 
-            # 일별 분석 횟수
-            cursor.execute("""
-                SELECT
-                    DATE(created_at) as date,
-                    COUNT(*) as analyses,
-                    SUM(total_items) as items
-                FROM analysis_records
-                WHERE created_at >= DATE('now', '-' || ? || ' days')
-                GROUP BY DATE(created_at)
-                ORDER BY date DESC
-            """, (days,))
+            if days == 30:
+                # 한달: 전체 분석 횟수만
+                client.execute("""
+                    SELECT
+                        DATE(created_at) as date,
+                        COUNT(*) as analyses
+                    FROM analysis_records
+                    WHERE created_at >= DATE('now', '-' || ? || ' days')
+                    GROUP BY DATE(created_at)
+                    ORDER BY date DESC
+                """, [adjusted_days])
 
-            daily_data = []
-            for row in cursor.fetchall():
-                daily_data.append({
-                    "date": row[0],
-                    "analyses": row[1],
-                    "items": row[2]
-                })
+                daily_data = []
+                for row in client.fetchall():
+                    daily_data.append({
+                        "date": row[0],
+                        "total_analyses": int(row[1])
+                    })
+            else:
+                # 하루/일주일: 클래스별 통계
+                client.execute("""
+                    SELECT
+                        DATE(ar.created_at) as date,
+                        di.category,
+                        COUNT(di.id) as count
+                    FROM analysis_records ar
+                    JOIN detected_items di ON ar.id = di.analysis_id
+                    WHERE ar.created_at >= DATE('now', '-' || ? || ' days')
+                    GROUP BY DATE(ar.created_at), di.category
+                    ORDER BY date DESC
+                """, [adjusted_days])
 
-            return {"daily_stats": daily_data}
+                # 날짜별로 데이터 구조화
+                daily_data_dict = {}
+                for row in client.fetchall():
+                    date = row[0]
+                    category = row[1]
+                    count = int(row[2])
+
+                    if date not in daily_data_dict:
+                        daily_data_dict[date] = {
+                            "date": date,
+                            "캔": 0,
+                            "유리": 0,
+                            "종이": 0,
+                            "플라스틱": 0,
+                            "스티로폼": 0,
+                            "비닐": 0
+                        }
+
+                    daily_data_dict[date][category] = count
+
+                # 리스트로 변환
+                daily_data = list(daily_data_dict.values())
+
+            return daily_data
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"일별 통계 조회 오류: {str(e)}")

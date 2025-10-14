@@ -1,0 +1,366 @@
+/* 팀 소개 페이지 전용 스타일 */
+.info-container {
+    max-width: 72rem;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+.info-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.info-logo {
+    margin-bottom: 1rem;
+}
+
+.logo-icon-large {
+    font-size: 5rem;
+    color: #11d452;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+.info-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1c1c1c;
+    margin-bottom: 0.5rem;
+}
+
+body.dark-mode .info-title {
+    color: white;
+}
+
+.info-subtitle {
+    font-size: 1.125rem;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode .info-subtitle {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* 프로젝트 섹션 */
+.project-section {
+    margin-bottom: 3rem;
+}
+
+.project-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 2rem;
+    border-radius: 0.75rem;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    transition: all 0.4s ease;
+    text-align: center;
+}
+
+@media (hover: hover) {
+    .project-card:hover {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        border-color: rgba(17, 212, 82, 0.5);
+    }
+}
+
+body.dark-mode .project-card {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1c1c1c;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+body.dark-mode .section-title {
+    color: white;
+}
+
+.section-title .material-symbols-outlined {
+    color: #11d452;
+}
+
+.project-description {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: rgba(0, 0, 0, 0.7);
+    margin-bottom: 1.5rem;
+}
+
+body.dark-mode .project-description {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* 기술 스택 */
+.tech-stack {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.tech-badge {
+    padding: 0.5rem 1rem;
+    background-color: rgba(17, 212, 82, 0.1);
+    color: #11d452;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: 2px solid rgba(17, 212, 82, 0.3);
+}
+
+body.dark-mode .tech-badge {
+    background-color: rgba(17, 212, 82, 0.15);
+}
+
+/* 팀 섹션 */
+.team-section {
+    margin-bottom: 3rem;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.member-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 2rem;
+    border-radius: 0.75rem;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: all 0.4s ease;
+}
+
+body.dark-mode .member-card {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+@media (hover: hover) {
+    .member-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        border-color: rgba(17, 212, 82, 0.5);
+    }
+}
+
+.member-avatar {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1rem;
+    background-color: rgba(17, 212, 82, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid rgba(17, 212, 82, 0.3);
+}
+
+.member-avatar .material-symbols-outlined {
+    font-size: 4rem;
+    color: #11d452;
+}
+
+.member-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1c1c1c;
+    margin-bottom: 0.5rem;
+}
+
+body.dark-mode .member-name {
+    color: white;
+}
+
+.member-role {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #11d452;
+    margin-bottom: 1rem;
+}
+
+.member-description {
+    font-size: 0.875rem;
+    color: rgba(0, 0, 0, 0.6);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+body.dark-mode .member-description {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.member-links {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.link-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(17, 212, 82, 0.1);
+    border-radius: 0.5rem;
+    border: 2px solid rgba(17, 212, 82, 0.3);
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.link-btn .material-symbols-outlined {
+    font-size: 1.25rem;
+    color: #11d452;
+}
+
+@media (hover: hover) {
+    .link-btn:hover {
+        background-color: rgba(17, 212, 82, 0.9);
+        transform: scale(1.1);
+    }
+
+    .link-btn:hover .material-symbols-outlined {
+        color: white;
+    }
+}
+
+.link-btn:active {
+    background-color: rgba(17, 212, 82, 0.9);
+}
+
+.link-btn:active .material-symbols-outlined {
+    color: white;
+}
+
+/* 링크 섹션 */
+.links-section {
+    margin-bottom: 2rem;
+}
+
+.links-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 2rem;
+    border-radius: 0.75rem;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: all 0.4s ease;
+}
+
+@media (hover: hover) {
+    .links-card:hover {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        border-color: rgba(17, 212, 82, 0.5);
+    }
+}
+
+body.dark-mode .links-card {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.links-icon {
+    font-size: 3rem;
+    color: #11d452;
+    margin-bottom: 1rem;
+}
+
+.links-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1c1c1c;
+    margin-bottom: 1.5rem;
+}
+
+body.dark-mode .links-title {
+    color: white;
+}
+
+.links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.project-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    text-decoration: none;
+    color: #1c1c1c;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .project-link {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.project-link .material-symbols-outlined {
+    color: #11d452;
+}
+
+@media (hover: hover) {
+    .project-link:hover {
+        background-color: rgba(17, 212, 82, 0.1);
+        border-color: rgba(17, 212, 82, 0.5);
+        transform: translateY(-2px);
+    }
+}
+
+.project-link:active {
+    background-color: rgba(17, 212, 82, 0.1);
+    border-color: rgba(17, 212, 82, 0.5);
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .info-title {
+        font-size: 2rem;
+    }
+
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .links-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .project-card,
+    .links-card {
+        padding: 1.5rem;
+    }
+
+    .tech-stack {
+        justify-content: center;
+    }
+}

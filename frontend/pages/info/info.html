@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>소개 - Recycle Lens</title>
+
+        <!-- Favicon -->
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>♻️</text></svg>">
+
+        <!-- Google 폰트 -->
+        <link href="https://fonts.googleapis.com" rel="preconnect" />
+        <link
+            crossorigin=""
+            href="https://fonts.gstatic.com"
+            rel="preconnect"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+            rel="stylesheet"
+        />
+
+        <!-- 사용자 정의 스타일 -->
+        <link rel="stylesheet" href="../../style.css" />
+        <link rel="stylesheet" href="info.css" />
+
+        <!-- JavaScript -->
+        <script type="module" src="info.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <!-- 헤더 -->
+            <header class="header">
+                <a href="../../index.html" class="logo">
+                    <span class="material-symbols-outlined logo-icon"
+                        >recycling</span
+                    >
+                    <h1 class="logo-text">Recycle Lens</h1>
+                </a>
+                <nav class="nav">
+                    <a href="../stats/stats.html">통계</a>
+                    <a href="info.html">소개</a>
+                </nav>
+                <button class="mobile-menu-btn">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+            </header>
+
+            <!-- 메인 콘텐츠 -->
+            <main class="main">
+                <div class="info-container">
+                    <div class="info-header">
+                        <div class="info-logo">
+                            <span
+                                class="material-symbols-outlined logo-icon-large"
+                                >recycling</span
+                            >
+                        </div>
+                        <h2 class="info-title">Recycle Lens</h2>
+                        <p class="info-subtitle">
+                            AI 기반 재활용품 분류 시스템을 개발한 프로젝트입니다
+                        </p>
+                    </div>
+
+                    <!-- 프로젝트 정보 -->
+                    <section class="project-section">
+                        <div class="project-card">
+                            <h3 class="section-title">
+                                <span class="material-symbols-outlined"
+                                    >info</span
+                                >
+                                프로젝트 소개
+                            </h3>
+                            <p class="project-description">
+                                Recycle Lens는 YOLO11m과 ResNet18을 결합한 2단계
+                                파이프라인으로 재활용품을 자동으로 분류하는
+                                시스템입니다. <br />이미지 업로드와 실시간 웹캠
+                                인식을 통해 캔, 유리, 종이, 플라스틱, 스티로폼,
+                                비닐 총 6개 카테고리를 88% 정확도로 분류합니다.
+                            </p>
+                            <div class="tech-stack">
+                                <span class="tech-badge">YOLO11m</span>
+                                <span class="tech-badge">ResNet18</span>
+                                <span class="tech-badge">FastAPI</span>
+                                <span class="tech-badge">PyTorch</span>
+                                <span class="tech-badge">Chart.js</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 팀 멤버 -->
+                    <section class="team-section">
+                        <h3 class="section-title">
+                            <span class="material-symbols-outlined">group</span>
+                            팀원 소개
+                        </h3>
+                        <div class="team-grid">
+                            <!-- 멤버 1 -->
+                            <div class="member-card">
+                                <div class="member-avatar">
+                                    <span class="material-symbols-outlined"
+                                        >person</span
+                                    >
+                                </div>
+                                <h4 class="member-name">팀원 1</h4>
+                                <p class="member-role">ML Engineer / Backend</p>
+                                <p class="member-description">
+                                    모델 학습 및 파이프라인 설계, FastAPI 백엔드
+                                    개발
+                                </p>
+                                <div class="member-links">
+                                    <a
+                                        href="mailto:member1@example.com"
+                                        class="link-btn"
+                                        title="이메일"
+                                    >
+                                        <span class="material-symbols-outlined"
+                                            >mail</span
+                                        >
+                                    </a>
+                                    <a
+                                        href="https://github.com/username1"
+                                        class="link-btn"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        title="GitHub"
+                                    >
+                                        <span class="material-symbols-outlined"
+                                            >code</span
+                                        >
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- 멤버 2 -->
+                            <div class="member-card">
+                                <div class="member-avatar">
+                                    <span class="material-symbols-outlined"
+                                        >person</span
+                                    >
+                                </div>
+                                <h4 class="member-name">팀원 2</h4>
+                                <p class="member-role">Frontend Developer</p>
+                                <p class="member-description">
+                                    웹 인터페이스 설계 및 개발, 실시간 웹캠 인식
+                                    구현
+                                </p>
+                                <div class="member-links">
+                                    <a
+                                        href="mailto:member2@example.com"
+                                        class="link-btn"
+                                        title="이메일"
+                                    >
+                                        <span class="material-symbols-outlined"
+                                            >mail</span
+                                        >
+                                    </a>
+                                    <a
+                                        href="https://github.com/username2"
+                                        class="link-btn"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        title="GitHub"
+                                    >
+                                        <span class="material-symbols-outlined"
+                                            >code</span
+                                        >
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- 멤버 3 -->
+                            <div class="member-card">
+                                <div class="member-avatar">
+                                    <span class="material-symbols-outlined"
+                                        >person</span
+                                    >
+                                </div>
+                                <h4 class="member-name">팀원 3</h4>
+                                <p class="member-role">Data Engineer</p>
+                                <p class="member-description">
+                                    데이터 수집 및 전처리, 통계 시스템 구축
+                                </p>
+                                <div class="member-links">
+                                    <a
+                                        href="mailto:member3@example.com"
+                                        class="link-btn"
+                                        title="이메일"
+                                    >
+                                        <span class="material-symbols-outlined"
+                                            >mail</span
+                                        >
+                                    </a>
+                                    <a
+                                        href="https://github.com/username3"
+                                        class="link-btn"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        title="GitHub"
+                                    >
+                                        <span class="material-symbols-outlined"
+                                            >code</span
+                                        >
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 프로젝트 링크 -->
+                    <section class="links-section">
+                        <div class="links-card">
+                            <span class="material-symbols-outlined links-icon"
+                                >link</span
+                            >
+                            <h3 class="links-title">프로젝트 링크</h3>
+                            <div class="links-grid">
+                                <a
+                                    href="https://github.com/your-repo"
+                                    class="project-link"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <span class="material-symbols-outlined"
+                                        >code</span
+                                    >
+                                    <span>GitHub Repository</span>
+                                </a>
+                                <a href="../../index.html" class="project-link">
+                                    <span class="material-symbols-outlined"
+                                        >recycling</span
+                                    >
+                                    <span>분류 시작하기</span>
+                                </a>
+                                <a
+                                    href="../stats/stats.html"
+                                    class="project-link"
+                                >
+                                    <span class="material-symbols-outlined"
+                                        >analytics</span
+                                    >
+                                    <span>통계 보기</span>
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </body>
+</html>
