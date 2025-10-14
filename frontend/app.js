@@ -1,3 +1,19 @@
+// API URL 설정 (환경 자동 감지)
+function getApiUrl() {
+    const hostname = window.location.hostname;
+
+    // 로컬 개발 환경
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'http://localhost:8000';
+    }
+
+    // Vercel 프로덕션 환경
+    // 배포 후 실제 백엔드 URL로 변경 필요
+    return '/api';  // Vercel Serverless Functions 사용 시
+}
+
+const API_BASE_URL = getApiUrl();
+
 // DOM 요소 선택
 const imageUploadInput = document.getElementById("image-upload");
 const realtimeBtn = document.getElementById("realtime-btn");
@@ -8,6 +24,31 @@ const imagePreviewContainer = document.getElementById("image-preview-container")
 const cameraFeedContainer = document.getElementById("camera-feed-container");
 const resultsSection = document.getElementById("results-section");
 const homeLogo = document.getElementById("home-logo");
+
+// 모바일 메뉴 설정
+const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+const nav = document.querySelector('.nav');
+
+if (mobileMenuBtn && nav) {
+    mobileMenuBtn.addEventListener('click', () => {
+        nav.classList.toggle('active');
+        console.log('모바일 메뉴 토글');
+    });
+
+    // 메뉴 항목 클릭 시 메뉴 닫기
+    nav.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            nav.classList.remove('active');
+        });
+    });
+
+    // 메뉴 외부 클릭 시 닫기
+    document.addEventListener('click', (e) => {
+        if (!nav.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+            nav.classList.remove('active');
+        }
+    });
+}
 
 // 홈 로고 클릭 이벤트 - 페이지 초기화
 homeLogo.addEventListener("click", (event) => {
@@ -89,7 +130,7 @@ analyzeBtn.addEventListener("click", async () => {
 
     try {
         // API 호출
-        const response = await fetch("http://localhost:8000/predict", {
+        const response = await fetch(`${API_BASE_URL}/predict`, {
             method: "POST",
             body: formData,
         });
@@ -137,25 +178,45 @@ function displayResults(apiResponse) {
     // 다중 객체 결과 표시
     let resultsHTML = `<h3 class="results-title">${apiResponse.summary}</h3>`;
 
-    apiResponse.recycling_items.forEach((item) => {
+    apiResponse.recycling_items.forEach((item, index) => {
         const category = item.recycling_info.category;
         const confidence = (item.recycling_info.confidence * 100).toFixed(0);
         const method = item.recycling_info.recycling_method;
+        const actualConfidence = item.recycling_info.confidence;
 
         resultsHTML += `
-            <div class="result-header">
-                <span class="result-icon">♻️</span>
-                <div>
-                    <p class="result-label">${category} (${confidence}%)</p>
-                    <p class="result-status">재활용 가능</p>
+            <div class="result-item" data-index="${index}">
+                <div class="result-content">
+                    <div class="result-header">
+                        <span class="result-icon">♻️</span>
+                        <div>
+                            <p class="result-label">${category} (${confidence}%)</p>
+                            <p class="result-status">재활용 가능</p>
+                        </div>
+                    </div>
+                    <p class="result-description">${method}</p>
+                </div>
+                <div class="feedback-section">
+                    <button class="feedback-btn" data-category="${category}" data-confidence="${actualConfidence}">
+                        <span class="material-symbols-outlined">report</span>
+                        <span>결과가 잘못되었나요?</span>
+                    </button>
                 </div>
             </div>
-            <p class="result-description">${method}</p>
-            <hr style="margin: 1rem 0; border: none; border-top: 1px solid rgba(0,0,0,0.1);">
+            ${index < apiResponse.recycling_items.length - 1 ? '<hr style="margin: 1rem 0; border: none; border-top: 1px solid rgba(0,0,0,0.1);">' : ''}
         `;
     });
 
     resultsCard.innerHTML = resultsHTML;
+
+    // 피드백 버튼 이벤트 리스너 추가
+    document.querySelectorAll('.feedback-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const predictedClass = btn.dataset.category;
+            const confidence = parseFloat(btn.dataset.confidence);
+            showFeedbackModal(predictedClass, confidence, btn);
+        });
+    });
 }
 
 // 드래그 앤 드롭 기능
@@ -294,7 +355,7 @@ async function analyzeCurrentFrame() {
         formData.append("file", blob, "frame.jpg");
 
         // API 호출
-        const response = await fetch("http://localhost:8000/predict", {
+        const response = await fetch(`${API_BASE_URL}/predict`, {
             method: "POST",
             body: formData,
         });
@@ -431,7 +492,7 @@ speedSlider.addEventListener("input", (e) => {
 // 분석 결과를 서버에 저장
 async function saveAnalysisToServer(result) {
     try {
-        const response = await fetch("http://localhost:8000/api/stats", {
+        const response = await fetch(`${API_BASE_URL}/api/stats`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -450,4 +511,120 @@ async function saveAnalysisToServer(result) {
         console.error("❌ 통계 저장 오류:", error);
         // 저장 실패해도 사용자 경험에는 영향 없음
     }
+}
+
+// ===== 피드백 기능 =====
+
+// 피드백 모달 표시
+function showFeedbackModal(predictedClass, confidence, feedbackButton) {
+    const categories = ["캔", "유리", "종이", "플라스틱", "스티로폼", "비닐"];
+
+    // 모달 HTML 생성
+    const modalHTML = `
+        <div class="feedback-modal" id="feedback-modal">
+            <div class="feedback-modal-content">
+                <div class="feedback-modal-header">
+                    <h3>올바른 분류를 선택해주세요</h3>
+                    <button class="feedback-modal-close" id="close-feedback-modal">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <p class="feedback-modal-subtitle">
+                    예측 결과: <strong>${predictedClass}</strong> (${(confidence * 100).toFixed(0)}%)
+                </p>
+                <div class="feedback-category-grid">
+                    ${categories.map(category => `
+                        <button class="feedback-category-btn" data-category="${category}">
+                            <span class="category-icon">♻️</span>
+                            <span class="category-name">${category}</span>
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+
+    // 모달을 body에 추가
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // 모달 요소 가져오기
+    const modal = document.getElementById('feedback-modal');
+    const closeBtn = document.getElementById('close-feedback-modal');
+
+    // 닫기 버튼 이벤트
+    closeBtn.addEventListener('click', () => {
+        modal.remove();
+    });
+
+    // 모달 외부 클릭 시 닫기
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+
+    // 카테고리 버튼 클릭 이벤트
+    document.querySelectorAll('.feedback-category-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const actualClass = btn.dataset.category;
+
+            // 피드백 저장
+            const success = await saveFeedback(predictedClass, actualClass, confidence);
+
+            // 모달 닫기
+            modal.remove();
+
+            // 피드백 버튼 상태 변경
+            if (success) {
+                updateFeedbackButton(feedbackButton, actualClass);
+            }
+        });
+    });
+}
+
+// 피드백을 서버에 저장
+async function saveFeedback(predictedClass, actualClass, confidence) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/feedback`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                predicted_class: predictedClass,
+                actual_class: actualClass,
+                confidence: confidence
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("✅ 피드백 저장 완료:", data.message);
+
+        return true;
+
+    } catch (error) {
+        console.error("❌ 피드백 저장 오류:", error);
+        alert("피드백 저장 중 오류가 발생했습니다.");
+        return false;
+    }
+}
+
+// 피드백 버튼 상태 업데이트
+function updateFeedbackButton(button, actualClass) {
+    // 버튼 비활성화 및 스타일 변경
+    button.disabled = true;
+    button.style.cursor = 'default';
+
+    // 버튼 내용 변경
+    button.innerHTML = `
+        <span class="material-symbols-outlined">check_circle</span>
+        <span>피드백 완료 (${actualClass})</span>
+    `;
+
+    // 버튼 클래스 변경
+    button.classList.add('feedback-submitted');
 }

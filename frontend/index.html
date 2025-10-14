@@ -5,7 +5,10 @@
         <meta content="width=device-width, initial-scale=1.0" name="viewport" />
         <title>Recycle Lens</title>
 
-        <!-- Google Fonts -->
+        <!-- Favicon -->
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>♻️</text></svg>">
+
+        <!-- Google 폰트 -->
         <link href="https://fonts.googleapis.com" rel="preconnect" />
         <link
             crossorigin=""
@@ -21,7 +24,7 @@
             rel="stylesheet"
         />
 
-        <!-- Custom Styles -->
+        <!-- 사용자 정의 스타일 -->
         <link rel="stylesheet" href="style.css" />
 
         <!-- JavaScript -->
@@ -29,7 +32,7 @@
     </head>
     <body>
         <div class="container">
-            <!-- Header -->
+            <!-- 헤더 -->
             <header class="header">
                 <a href="#" id="home-logo" class="logo">
                     <span class="material-symbols-outlined logo-icon"
@@ -38,25 +41,25 @@
                     <h1 class="logo-text">Recycle Lens</h1>
                 </a>
                 <nav class="nav">
-                    <a href="#">통계</a>
-                    <a href="#">문의</a>
+                    <a href="pages/stats/stats.html">통계</a>
+                    <a href="pages/info/info.html">소개</a>
                 </nav>
                 <button class="mobile-menu-btn">
                     <span class="material-symbols-outlined">menu</span>
                 </button>
             </header>
 
-            <!-- Main Content -->
+            <!-- 메인 콘텐츠 -->
             <main class="main">
                 <div class="content-wrapper">
                     <h2 class="title">재활용품 분류하기</h2>
                     <p class="description">
                         재활용품 이미지를 업로드하거나 실시간으로 촬영하여
-                        인공지능으로 종류를 식별하고 올바른 분리배출 방법을
-                        안내받으세요.
+                        인공지능으로 <br />종류를 식별하고 올바른 분리배출
+                        방법을 안내받으세요.
                     </p>
 
-                    <!-- Upload Area -->
+                    <!-- 업로드 영역 -->
                     <div class="upload-section">
                         <label
                             for="image-upload"
@@ -83,7 +86,7 @@
                                 class="image-preview hidden"
                             ></div>
 
-                            <!-- Realtime Camera Container -->
+                            <!-- 실시간 카메라 컨테이너 -->
                             <div
                                 id="camera-feed-container"
                                 class="camera-feed hidden"
@@ -97,7 +100,7 @@
                             </div>
                         </label>
 
-                        <!-- Action Buttons -->
+                        <!-- 액션 버튼 -->
                         <div class="button-group">
                             <button id="realtime-btn" class="btn btn-realtime">
                                 <span class="material-symbols-outlined"
@@ -110,7 +113,7 @@
                             </button>
                         </div>
 
-                        <!-- Realtime Controls (hidden by default) -->
+                        <!-- 실시간 컨트롤 (기본적으로 숨김) -->
                         <div
                             id="realtime-controls"
                             class="realtime-controls hidden"
@@ -130,13 +133,13 @@
                         </div>
                     </div>
 
-                    <!-- Results Section -->
+                    <!-- 결과 섹션 -->
                     <div id="results-section" class="results-section hidden">
                         <h3 class="results-title">분류 결과</h3>
                         <div class="results-card"></div>
                     </div>
 
-                    <!-- Realtime History -->
+                    <!-- 실시간 히스토리 -->
                     <div id="realtime-history" class="realtime-history hidden">
                         <h3 class="section-title">최근 탐지 결과</h3>
                         <div id="detection-history" class="detection-history">

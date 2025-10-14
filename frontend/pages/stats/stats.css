@@ -1,0 +1,372 @@
+/* 통계 페이지 전용 스타일 */
+.stats-container {
+    max-width: 72rem;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+.stats-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.stats-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1c1c1c;
+    margin-bottom: 0.5rem;
+}
+
+body.dark-mode .stats-title {
+    color: white;
+}
+
+.stats-subtitle {
+    font-size: 1.125rem;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode .stats-subtitle {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* 요약 카드 */
+.summary-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.summary-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 2rem;
+    border-radius: 0.75rem;
+    text-align: center;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    transition: all 0.4s ease;
+}
+
+body.dark-mode .summary-card {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+@media (hover: hover) {
+    .summary-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        border-color: rgba(17, 212, 82, 0.5);
+    }
+}
+
+.summary-icon {
+    font-size: 3rem;
+    color: #11d452;
+    margin-bottom: 1rem;
+}
+
+.summary-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1c1c1c;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+body.dark-mode .summary-value {
+    color: white;
+}
+
+.summary-label {
+    font-size: 1rem;
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: 500;
+}
+
+body.dark-mode .summary-label {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* 차트 섹션 */
+.chart-section {
+    margin-bottom: 3rem;
+}
+
+.chart-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 2rem;
+    border-radius: 0.75rem;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    transition: all 0.4s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+@media (hover: hover) {
+    .chart-card:hover {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        border-color: rgba(17, 212, 82, 0.5);
+    }
+}
+
+body.dark-mode .chart-card {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.chart-header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.chart-header .chart-title {
+    margin-bottom: 0;
+}
+
+.chart-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1c1c1c;
+    text-align: center;
+    margin-bottom: 3rem;
+    flex: 1;
+}
+
+body.dark-mode .chart-title {
+    color: white;
+}
+
+/* 기간 선택기 */
+.period-selector {
+    display: flex;
+    gap: 0.5rem;
+    position: absolute;
+    right: 0;
+}
+
+.period-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: rgba(0, 0, 0, 0.6);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .period-btn {
+    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.1);
+    color: rgba(255, 255, 255, 0.6);
+}
+
+@media (hover: hover) {
+    .period-btn:hover {
+        background-color: rgba(17, 212, 82, 0.1);
+        border-color: rgba(17, 212, 82, 0.3);
+        color: #11d452;
+    }
+}
+
+.period-btn.active {
+    background-color: rgba(17, 212, 82, 0.9);
+    border-color: rgba(17, 212, 82, 1);
+    color: white;
+}
+
+.chart-container {
+    position: relative;
+    height: 400px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.chart-container.pie-chart {
+    height: 350px;
+    max-width: 500px;
+}
+
+/* 로딩 상태 */
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem;
+    color: rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .loading {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.loading-spinner {
+    font-size: 3rem;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 빈 상태 */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem;
+    color: rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .empty-state {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.empty-text {
+    font-size: 1.125rem;
+    text-align: center;
+}
+
+/* 피드백 통계 섹션 */
+.chart-description {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+    text-align: center;
+}
+
+body.dark-mode .chart-description {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.feedback-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+    width: 100%;
+}
+
+.feedback-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, rgba(17, 212, 82, 0.05), rgba(17, 212, 82, 0.1));
+    border-radius: 10px;
+    border-left: 3px solid #11d452;
+}
+
+body.dark-mode .feedback-stat-item {
+    background: linear-gradient(135deg, rgba(17, 212, 82, 0.1), rgba(17, 212, 82, 0.15));
+}
+
+.feedback-icon {
+    font-size: 2rem;
+    color: #11d452;
+}
+
+.feedback-stat-content {
+    flex: 1;
+}
+
+.feedback-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1c1c1c;
+    margin-bottom: 0.2rem;
+}
+
+body.dark-mode .feedback-value {
+    color: white;
+}
+
+.feedback-label {
+    font-size: 0.8rem;
+    color: #666;
+    font-weight: 500;
+}
+
+body.dark-mode .feedback-label {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .stats-title {
+        font-size: 2rem;
+    }
+
+    .summary-section {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-container {
+        height: 300px;
+    }
+
+    .chart-card {
+        padding: 1.5rem;
+    }
+
+    .chart-header {
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .chart-header .chart-title {
+        margin-bottom: 0;
+    }
+
+    .period-selector {
+        position: static;
+        justify-content: center;
+    }
+
+    .period-btn {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .feedback-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .feedback-stat-item {
+        padding: 0.875rem;
+    }
+
+    .feedback-icon {
+        font-size: 2rem;
+    }
+
+    .feedback-value {
+        font-size: 1.5rem;
+    }
+}

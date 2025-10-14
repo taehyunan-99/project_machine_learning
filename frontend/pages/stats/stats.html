@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>통계 - Recycle Lens</title>
+
+        <!-- Favicon -->
+        <link
+            rel="icon"
+            href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>♻️</text></svg>"
+        />
+
+        <!-- Google 폰트 -->
+        <link href="https://fonts.googleapis.com" rel="preconnect" />
+        <link
+            crossorigin=""
+            href="https://fonts.gstatic.com"
+            rel="preconnect"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+            rel="stylesheet"
+        />
+
+        <!-- Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <!-- 사용자 정의 스타일 -->
+        <link rel="stylesheet" href="../../style.css" />
+        <link rel="stylesheet" href="stats.css" />
+
+        <!-- JavaScript -->
+        <script type="module" src="stats.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <!-- 헤더 -->
+            <header class="header">
+                <a href="../../index.html" class="logo">
+                    <span class="material-symbols-outlined logo-icon"
+                        >recycling</span
+                    >
+                    <h1 class="logo-text">Recycle Lens</h1>
+                </a>
+                <nav class="nav">
+                    <a href="stats.html">통계</a>
+                    <a href="../info/info.html">소개</a>
+                </nav>
+                <button class="mobile-menu-btn">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+            </header>
+
+            <!-- 메인 콘텐츠 -->
+            <main class="main">
+                <div class="stats-container">
+                    <div class="stats-header">
+                        <h2 class="stats-title">재활용품 분류 통계</h2>
+                        <p class="stats-subtitle">
+                            모든 사용자의 분석 데이터를 기반으로 한 통계입니다
+                        </p>
+                    </div>
+
+                    <!-- 요약 카드 -->
+                    <section class="summary-section">
+                        <div class="summary-card">
+                            <span class="material-symbols-outlined summary-icon"
+                                >analytics</span
+                            >
+                            <div class="summary-value" id="total-analyses">
+                                -
+                            </div>
+                            <div class="summary-label">총 분석 횟수</div>
+                        </div>
+                        <div class="summary-card">
+                            <span class="material-symbols-outlined summary-icon"
+                                >verified</span
+                            >
+                            <div class="summary-value" id="avg-accuracy">-</div>
+                            <div class="summary-label">평균 신뢰도</div>
+                        </div>
+                        <div class="summary-card">
+                            <span class="material-symbols-outlined summary-icon"
+                                >emoji_events</span
+                            >
+                            <div class="summary-value" id="top-category">-</div>
+                            <div class="summary-label">최다 카테고리</div>
+                        </div>
+                    </section>
+
+                    <!-- 카테고리 분포 차트 -->
+                    <section class="chart-section">
+                        <div class="chart-card">
+                            <h3 class="chart-title">카테고리별 탐지 비율</h3>
+                            <div class="chart-container pie-chart">
+                                <canvas id="category-chart"></canvas>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 일별 통계 차트 -->
+                    <section class="chart-section">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3 class="chart-title">일별 통계</h3>
+                                <div class="period-selector">
+                                    <button class="period-btn" data-days="1">
+                                        하루
+                                    </button>
+                                    <button
+                                        class="period-btn active"
+                                        data-days="7"
+                                    >
+                                        일주일
+                                    </button>
+                                    <button class="period-btn" data-days="30">
+                                        한달
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="daily-chart"></canvas>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 피드백 통계 섹션 -->
+                    <section class="chart-section">
+                        <div class="chart-card">
+                            <h3 class="chart-title">
+                                오답률 통계
+                            </h3>
+                            <p class="chart-description">
+                                사용자가 보고한 오분류 데이터를 기반으로 한
+                                카테고리별 오답률입니다.
+                            </p>
+                            <div class="feedback-summary">
+                                <div class="feedback-stat-item">
+                                    <span
+                                        class="material-symbols-outlined feedback-icon"
+                                        >report</span
+                                    >
+                                    <div class="feedback-stat-content">
+                                        <div
+                                            class="feedback-value"
+                                            id="total-feedback"
+                                        >
+                                            -
+                                        </div>
+                                        <div class="feedback-label">
+                                            총 피드백 수
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="feedback-stat-item">
+                                    <span
+                                        class="material-symbols-outlined feedback-icon"
+                                        >trending_down</span
+                                    >
+                                    <div class="feedback-stat-content">
+                                        <div
+                                            class="feedback-value"
+                                            id="most-confused"
+                                        >
+                                            -
+                                        </div>
+                                        <div class="feedback-label">
+                                            가장 취약한 카테고리
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="feedback-chart"></canvas>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </body>
+</html>
