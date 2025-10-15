@@ -31,21 +31,29 @@ python -m http.server 8080
 ## 📁 프로젝트 구조
 
 ```
-├── backend/          # FastAPI 백엔드
+├── backend/              # FastAPI 백엔드
 │   ├── app/
-│   │   ├── main.py
-│   │   ├── routers/
-│   │   ├── database.py
-│   │   └── models/
+│   │   ├── main.py       # FastAPI 앱
+│   │   ├── database.py   # DB 연결
+│   │   └── routers/      # API 라우터
+│   ├── models/           # 학습된 모델 파일
+│   │   ├── yolo11m.pt
+│   │   └── model_v4.pth
+│   ├── training/         # 모델 학습 코드
+│   │   ├── model.py
+│   │   ├── pipeline.py
+│   │   ├── yolo_detector.py
+│   │   ├── datasets/
+│   │   └── sample_data/
+│   ├── Dockerfile
 │   └── requirements.txt
-├── frontend/         # 정적 프론트엔드
+├── frontend/             # 정적 프론트엔드
 │   ├── index.html
 │   ├── app.js
 │   ├── style.css
 │   └── pages/
-│       ├── stats/
-│       └── info/
-└── training/         # 모델 학습 코드
-    ├── train.py
-    └── datasets/
+│       ├── stats/        # 통계 페이지
+│       └── info/         # 소개 페이지
+├── railway.toml          # Railway 배포 설정
+└── README.md
 ```
