@@ -174,12 +174,18 @@ body.dark-mode .member-card {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 3px solid rgba(17, 212, 82, 0.3);
 }
 
 .member-avatar .material-symbols-outlined {
     font-size: 4rem;
     color: #11d452;
+}
+
+.member-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
 }
 
 .member-name {
