@@ -1,6 +1,6 @@
 # ♻️ Recycle Lens
 
-#### [🌐 Web Link](https://project-machine-learning-msdt41gv5-taehyunans-projects.vercel.app/index.html)
+#### [🌐 Web Link](https://project-machine-learning-eight.vercel.app)
 
 ## AI 기반 재활용품 분류 시스템을 개발한 프로젝트입니다
 
