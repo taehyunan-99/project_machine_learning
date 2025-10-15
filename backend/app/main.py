@@ -22,6 +22,7 @@ allowed_origins = [
     "http://localhost:8080",
     "http://127.0.0.1:8080",
     "https://project-machine-learning-msdt41gv5-taehyunans-projects.vercel.app",
+    "https://project-machine-learning-eight.vercel.app",
 ]
 
 # 개발 환경에서는 모든 origin 허용
