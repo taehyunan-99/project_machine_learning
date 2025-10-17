@@ -1141,7 +1141,7 @@ function updateStep() {
 
     // 지도 중심 이동
     map.setView([current.location.lat, current.location.lng], 13, {
-        animate: true,
+        animate: false,
     });
 
     // 단계 정보 표시
