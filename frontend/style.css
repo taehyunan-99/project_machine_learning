@@ -1183,7 +1183,7 @@ body.dark-mode .map-navigation {
 
 @media (hover: hover) {
     .map-nav-btn:not(:disabled):hover {
-        transform: scale(1.05);
+        /* transform: scale(1.05); - 무한루프 방지를 위해 제거 */
         background-color: rgba(17, 212, 82, 0.8);
     }
 }
@@ -1226,12 +1226,12 @@ body.dark-mode .step-info {
     border-color: rgba(17, 212, 82, 0.4);
 }
 
-@media (hover: hover) {
+/* 호버 효과 완전 제거 - 무한루프 방지 */
+/* @media (hover: hover) {
     .step-info:hover {
         border-color: rgba(17, 212, 82, 0.6);
-        /* box-shadow 변경 제거 - 무한루프 방지 */
     }
-}
+} */
 
 .step-info.hidden {
     display: none;
