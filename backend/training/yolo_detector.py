@@ -39,8 +39,9 @@ class YOLODetector:
         # 이미지 로드 (모델 적용 시 리스트 자동 생성)
         yolo_results = self.model(
             img_path,
-            conf=0.25, # 신뢰도 25% 이상 객체만 탐지
-            iou=0.5 # 겹치는 박스중 하나만 선택
+            conf=0.15, # 신뢰도 15% 이상 객체만 탐지
+            iou=0.5, # 겹치는 박스중 하나만 선택
+            imgsz=1280 # 입력 이미지 해상도 증가
         )
         # 이미지 리스트에서 0번 이미지 로드
         detection = yolo_results[0]

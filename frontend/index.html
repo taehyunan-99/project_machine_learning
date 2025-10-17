@@ -6,7 +6,10 @@
         <title>Recycle Lens</title>
 
         <!-- Favicon -->
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>♻️</text></svg>">
+        <link
+            rel="icon"
+            href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>♻️</text></svg>"
+        />
 
         <!-- Google 폰트 -->
         <link href="https://fonts.googleapis.com" rel="preconnect" />
@@ -24,8 +27,17 @@
             rel="stylesheet"
         />
 
+        <!-- Leaflet CSS -->
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        />
+
         <!-- 사용자 정의 스타일 -->
         <link rel="stylesheet" href="style.css" />
+
+        <!-- Leaflet JS -->
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
         <!-- JavaScript -->
         <script type="module" src="app.js"></script>
@@ -137,6 +149,50 @@
                     <div id="results-section" class="results-section hidden">
                         <h3 class="results-title">분류 결과</h3>
                         <div class="results-card"></div>
+                    </div>
+
+                    <!-- 재활용 처리 경로 지도 -->
+                    <div id="map-section" class="map-section hidden">
+                        <div class="map-header">
+                            <h3 class="map-title">
+                                <span class="material-symbols-outlined"
+                                    >energy_savings_leaf</span
+                                >
+                                재활용에서 재생에너지까지
+                            </h3>
+                            <p class="map-subtitle">
+                                분류된 재활용품이 재생에너지로 변하는 과정을
+                                확인하세요!
+                            </p>
+                            <button id="get-location-btn" class="location-btn">
+                                <span class="material-symbols-outlined"
+                                    >my_location</span
+                                >
+                                현재 위치에서 확인하기
+                            </button>
+                            <div
+                                id="location-info"
+                                class="location-info hidden"
+                            >
+                                <span class="material-symbols-outlined"
+                                    >location_on</span
+                                >
+                                <span id="location-text">위치 정보</span>
+                            </div>
+                        </div>
+                        <div id="map" class="map-view hidden"></div>
+                        <div id="map-navigation" class="map-navigation hidden">
+                            <button id="prev-step-btn" class="map-nav-btn">
+                                <span class="material-symbols-outlined">arrow_back</span>
+                                이전
+                            </button>
+                            <span id="step-indicator" class="step-indicator">1 / 4</span>
+                            <button id="next-step-btn" class="map-nav-btn">
+                                다음
+                                <span class="material-symbols-outlined">arrow_forward</span>
+                            </button>
+                        </div>
+                        <div id="step-info" class="step-info hidden"></div>
                     </div>
 
                     <!-- 실시간 히스토리 -->

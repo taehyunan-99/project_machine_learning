@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from .routers import health, predict, stats, feedback
+from .routers import health, predict, stats, feedback, geocoding
 from .database import init_db
 
 app = FastAPI(title="Recycle Lens API", version="0.1.0")
@@ -42,3 +42,4 @@ app.include_router(health.router)
 app.include_router(predict.router)
 app.include_router(stats.router)
 app.include_router(feedback.router)
+app.include_router(geocoding.router)
