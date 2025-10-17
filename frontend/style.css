@@ -1229,7 +1229,7 @@ body.dark-mode .step-info {
 @media (hover: hover) {
     .step-info:hover {
         border-color: rgba(17, 212, 82, 0.6);
-        box-shadow: 0 6px 16px rgba(17, 212, 82, 0.2);
+        /* box-shadow 변경 제거 - 무한루프 방지 */
     }
 }
 
