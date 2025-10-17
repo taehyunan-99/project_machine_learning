@@ -1159,11 +1159,7 @@ function updateStep() {
         `;
     }
 
-    // 팝업 열기
-    setTimeout(() => {
-        current.marker.openPopup();
-        isUpdatingStep = false; // 완료 후 플래그 해제
-    }, 400);
+    isUpdatingStep = false; // 플래그 해제
 }
 
 // 단계별 설명
