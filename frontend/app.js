@@ -1179,14 +1179,9 @@ document.getElementById("prev-step-btn").addEventListener("click", () => {
         updateStep();
         // 설명이 보이도록 스크롤
         setTimeout(() => {
-            const stepInfo = document.getElementById("step-info");
-            const rect = stepInfo.getBoundingClientRect();
-            const absoluteTop = rect.top + window.pageYOffset;
-            const offsetPosition = absoluteTop + stepInfo.offsetHeight - window.innerHeight + 20;
-
-            window.scrollTo({
-                top: offsetPosition,
-                behavior: "smooth"
+            document.getElementById("step-info").scrollIntoView({
+                behavior: "smooth",
+                block: "end"
             });
         }, 100);
     }
@@ -1198,14 +1193,9 @@ document.getElementById("next-step-btn").addEventListener("click", () => {
         updateStep();
         // 설명이 보이도록 스크롤
         setTimeout(() => {
-            const stepInfo = document.getElementById("step-info");
-            const rect = stepInfo.getBoundingClientRect();
-            const absoluteTop = rect.top + window.pageYOffset;
-            const offsetPosition = absoluteTop + stepInfo.offsetHeight - window.innerHeight + 20;
-
-            window.scrollTo({
-                top: offsetPosition,
-                behavior: "smooth"
+            document.getElementById("step-info").scrollIntoView({
+                behavior: "smooth",
+                block: "end"
             });
         }, 100);
     }
