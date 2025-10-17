@@ -1213,6 +1213,8 @@ body.dark-mode .step-indicator {
     border: 2px solid rgba(17, 212, 82, 0.3);
     box-shadow: 0 4px 12px rgba(17, 212, 82, 0.1);
     text-align: center;
+    min-height: 180px;
+    overflow-y: auto;
 }
 
 body.dark-mode .step-info {
