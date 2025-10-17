@@ -720,6 +720,7 @@ let currentStep = 0;
 let allMarkers = [];
 let routePolyline = null;
 let currentCategory = null;
+let isUpdatingStep = false;
 
 // 1차 시설 (구별 재활용선별시설)
 const primaryFacilities = {
@@ -1090,6 +1091,9 @@ function prepareRecyclingRoute(userLocation) {
 
 // 단계 업데이트
 function updateStep() {
+    if (isUpdatingStep) return; // 이미 실행중이면 중단
+    isUpdatingStep = true;
+
     const stepInfo = document.getElementById("step-info");
     const stepIndicator = document.getElementById("step-indicator");
     const prevBtn = document.getElementById("prev-step-btn");
@@ -1140,11 +1144,6 @@ function updateStep() {
         animate: true,
     });
 
-    // 팝업 열기
-    setTimeout(() => {
-        current.marker.openPopup();
-    }, 400);
-
     // 단계 정보 표시
     if (currentStep === 0) {
         stepInfo.innerHTML = `
@@ -1159,6 +1158,12 @@ function updateStep() {
             <p>${getStepDescription(current.type, currentCategory)}</p>
         `;
     }
+
+    // 팝업 열기
+    setTimeout(() => {
+        current.marker.openPopup();
+        isUpdatingStep = false; // 완료 후 플래그 해제
+    }, 400);
 }
 
 // 단계별 설명
