@@ -1159,6 +1159,9 @@ function updateStep() {
         `;
     }
 
+    // 팝업 자동 열기
+    current.marker.openPopup();
+
     isUpdatingStep = false; // 플래그 해제
 }
 
