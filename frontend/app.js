@@ -440,7 +440,10 @@ async function analyzeCurrentFrame() {
             ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
         }
     } catch (error) {
-        console.error("분석 중 오류:", error);
+        // 타임아웃 에러는 무시 (서버는 정상 작동 중)
+        if (!error.message.includes("Failed to fetch")) {
+            console.error("분석 중 오류:", error);
+        }
     }
 }
 
