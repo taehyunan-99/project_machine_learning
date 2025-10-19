@@ -14,25 +14,27 @@ app = FastAPI(title="Recycle Lens API", version="0.1.0")
 init_db()
 
 # CORS 설정
-# 개발 환경: localhost 허용
-# 프로덕션 환경: Vercel 도메인 추가 (배포 후 업데이트 필요)
 import os
 
-allowed_origins = [
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
-    "https://project-machine-learning-msdt41gv5-taehyunans-projects.vercel.app",
-    "https://project-machine-learning-eight.vercel.app",
-]
-
-# 개발 환경에서는 모든 origin 허용
-if os.getenv("ENV", "development") == "development":
+# 환경별 CORS 설정
+if os.getenv("ENV") == "production":
+    # 프로덕션: 모든 origin 허용
     allowed_origins = ["*"]
+    allow_credentials = False  # * 사용 시 False 필수
+else:
+    # 개발 환경: 특정 도메인만 허용
+    allowed_origins = [
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+        "https://project-machine-learning-msdt41gv5-taehyunans-projects.vercel.app",
+        "https://project-machine-learning-eight.vercel.app",
+    ]
+    allow_credentials = True
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_credentials=True,
+    allow_credentials=allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
