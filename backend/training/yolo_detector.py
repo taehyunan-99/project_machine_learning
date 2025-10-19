@@ -35,13 +35,13 @@ class YOLODetector:
     }
 
     # 객체 탐지 함수
-    def detect_objects(self, img_path, filter_recyclables=True):
+    def detect_objects(self, img_path, filter_recyclables=True, imgsz=1280, conf=0.15):
         # 이미지 로드 (모델 적용 시 리스트 자동 생성)
         yolo_results = self.model(
             img_path,
-            conf=0.15, # 신뢰도 15% 이상 객체만 탐지
+            conf=conf, # 신뢰도 임계값 (기본 0.15, 실시간은 0.3)
             iou=0.5, # 겹치는 박스중 하나만 선택
-            imgsz=1280 # 입력 이미지 해상도 증가
+            imgsz=imgsz # 입력 이미지 해상도 (기본 1280, 실시간은 640)
         )
         # 이미지 리스트에서 0번 이미지 로드
         detection = yolo_results[0]

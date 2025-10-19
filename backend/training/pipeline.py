@@ -154,17 +154,21 @@ class YOLOResNetPipeline:
         self.transform = test_transform
 
     # 객체 처리 함수
-    def process_object(self, img_path):
-        print(f"이미지 처리 시작: {img_path}")
+    def process_object(self, img_path, fast_mode=False):
+        print(f"이미지 처리 시작: {img_path} (고속모드: {fast_mode})")
 
         # 원본 이미지 로드 및 확인
         original_image = cv.imread(img_path)
         if original_image is None:
             print("이미지를 로드할 수 없습니다!")
             return []
-        
+
         # YOLO 객체 검출 (필터링 비활성화하여 모든 객체 탐지)
-        yolo_results = self.yolo.detect_objects(img_path, filter_recyclables=False)
+        # 실시간 모드: imgsz=640, conf=0.3 (빠르고 확실한 객체만)
+        # 일반 업로드: imgsz=1280, conf=0.15 (고품질, 더 많은 객체)
+        imgsz = 640 if fast_mode else 1280
+        conf = 0.3 if fast_mode else 0.15
+        yolo_results = self.yolo.detect_objects(img_path, filter_recyclables=False, imgsz=imgsz, conf=conf)
         print(f"YOLO 검출 완료: {len(yolo_results)}개 객체")
 
         # 객체 부분만 자르기

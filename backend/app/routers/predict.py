@@ -1,6 +1,7 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, Form
 import os, tempfile
 from training.pipeline import YOLOResNetPipeline
+from typing import Optional
 
 router = APIRouter(tags=["predict"])
 
@@ -9,9 +10,13 @@ pipeline = YOLOResNetPipeline()
 
 # 재활용품 이미지 분류 API
 @router.post("/predict")
-def predict(file: UploadFile = File(...)): # FormData 키 이름 : file
+def predict(
+    file: UploadFile = File(...),  # FormData 키 이름 : file
+    mode: Optional[str] = Form(None)  # mode: "realtime" 또는 None(일반 업로드)
+):
+    is_realtime = mode == "realtime"
     print(f"\n{'='*50}")
-    print(f"[새 요청] 파일명: {file.filename}")
+    print(f"[새 요청] 파일명: {file.filename}, 모드: {'실시간' if is_realtime else '일반 업로드'}")
 
     # 임시 파일로 저장 (처리 후 자동 삭제)
     with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1]) as tmp:
@@ -21,8 +26,8 @@ def predict(file: UploadFile = File(...)): # FormData 키 이름 : file
 
     try:
         # 파이프라인 실행: YOLO 객체 탐지 + ResNet 분류
-        print(f"[객체 탐지] AI 모델 실행 시작...")
-        detected_objects = pipeline.process_object(tmp_path)
+        print(f"[객체 탐지] AI 모델 실행 시작... (이미지 크기: {'640' if is_realtime else '1280'})")
+        detected_objects = pipeline.process_object(tmp_path, fast_mode=is_realtime)
         print(f"[탐지 결과] {len(detected_objects)}개 객체 탐지됨")
 
         # API 응답 포맷 생성
