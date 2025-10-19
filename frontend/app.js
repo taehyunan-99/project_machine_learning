@@ -129,6 +129,13 @@ let analysisSpeed = 1000; // 기본 1초
 // 히스토리 변수
 let detectionHistoryList = [];
 
+// 클릭 방지 함수
+function preventClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+}
+
 // 실시간 인식 버튼
 realtimeBtn.addEventListener("click", async () => {
     if (!isRealtimeActive) {
@@ -312,6 +319,10 @@ async function startRealtimeMode() {
         // video 요소에 스트림 연결
         webcamVideo.srcObject = realtimeStream;
 
+        // Canvas 즉시 초기화 (이전 박스 제거)
+        const ctx = overlayCanvas.getContext("2d");
+        ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+
         // UI 전환
         uploadPrompt.classList.add("hidden");
         imagePreviewContainer.classList.add("hidden");
@@ -323,6 +334,12 @@ async function startRealtimeMode() {
         // 클래스 추가 (클릭 방지)
         inputArea.classList.add("realtime-active");
         buttonGroup.classList.add("realtime-active");
+
+        // label의 for 속성 제거 (파일 업로드 창 막기)
+        inputArea.removeAttribute("for");
+
+        // 클릭 이벤트 완전히 차단
+        inputArea.addEventListener("click", preventClick);
 
         // 컨트롤 표시
         realtimeControls.classList.remove("hidden");
@@ -336,10 +353,14 @@ async function startRealtimeMode() {
         detectionHistoryList = [];
         renderHistory();
 
-        // Canvas 크기 설정
+        // Canvas 크기 설정 및 초기화
         webcamVideo.addEventListener("loadedmetadata", () => {
             overlayCanvas.width = webcamVideo.videoWidth;
             overlayCanvas.height = webcamVideo.videoHeight;
+
+            // Canvas 초기화 (이전 박스 제거)
+            const ctx = overlayCanvas.getContext("2d");
+            ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
         });
 
         // 자동 분석 시작
@@ -373,6 +394,12 @@ function stopRealtimeMode() {
     inputArea.classList.remove("realtime-active");
     inputArea.classList.remove("has-image");
     buttonGroup.classList.remove("realtime-active");
+
+    // label의 for 속성 복원
+    inputArea.setAttribute("for", "image-upload");
+
+    // 클릭 이벤트 리스너 제거
+    inputArea.removeEventListener("click", preventClick);
 
     // 버튼 텍스트 복원
     realtimeBtn.innerHTML =
@@ -415,6 +442,7 @@ async function analyzeCurrentFrame() {
         // FormData 생성
         const formData = new FormData();
         formData.append("file", blob, "frame.jpg");
+        formData.append("mode", "realtime"); // 실시간 모드 표시
 
         // API 호출
         const response = await fetch(`${API_BASE_URL}/predict`, {
