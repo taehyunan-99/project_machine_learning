@@ -4,7 +4,7 @@
 
 ## AI 기반 재활용품 분류 및 처리 경로 시각화 시스템
 
-Recycle Lens는 YOLO11m과 ResNet18을 결합한 2단계 AI 파이프라인으로 재활용품을 자동 분류하고, 서울시 재활용 처리 경로를 시각화하는 웹 애플리케이션입니다.
+Recycle Lens는 YOLO11s와 ResNet18을 결합한 2단계 AI 파이프라인으로 재활용품을 자동 분류하고, 서울시 재활용 처리 경로를 시각화하는 웹 애플리케이션입니다.
 
 ### 주요 기능
 - 🔍 이미지 업로드 기반 재활용품 분석
@@ -49,9 +49,9 @@ python -m http.server 8080
 │   ├── training/
 │   │   ├── model.py                # ResNet18 학습 코드
 │   │   ├── pipeline.py             # YOLO+ResNet 파이프라인
-│   │   └── yolo_detector.py        # YOLO11m 탐지 모듈
+│   │   └── yolo_detector.py        # YOLO11s 탐지 모듈
 │   ├── models/
-│   │   ├── yolo11m.pt              # YOLO Model
+│   │   ├── yolo11s.pt              # YOLO Model
 │   │   └── model_v4.pth            # ResNet18 Model
 │   ├── Dockerfile
 │   └── requirements.txt

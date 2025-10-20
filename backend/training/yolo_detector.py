@@ -8,7 +8,7 @@ class YOLODetector:
     # YOLO 초기화
     def __init__(self, model_path=None):
         if model_path is None:
-            model_path = os.path.join(os.path.dirname(__file__), "yolo11m.pt")
+            model_path = os.path.join(os.path.dirname(__file__), "yolo11s.pt")
         self.model = YOLO(model_path)
     
     # 재활용품 관련 클래스 ID

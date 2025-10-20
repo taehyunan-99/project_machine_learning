@@ -1211,13 +1211,11 @@ document.getElementById("prev-step-btn").addEventListener("click", () => {
     if (currentStep > 0) {
         currentStep--;
         updateStep();
-        // 설명이 보이도록 스크롤 (다음 렌더링 사이클에 실행)
+        // instant로 변경하여 중간 스크롤 이벤트 발생 방지
         requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                document.getElementById("step-info").scrollIntoView({
-                    behavior: "smooth",
-                    block: "end"
-                });
+            document.getElementById("step-info").scrollIntoView({
+                behavior: "instant",
+                block: "end"
             });
         });
     }
@@ -1227,13 +1225,11 @@ document.getElementById("next-step-btn").addEventListener("click", () => {
     if (currentStep < allMarkers.length - 1) {
         currentStep++;
         updateStep();
-        // 설명이 보이도록 스크롤 (다음 렌더링 사이클에 실행)
+        // instant로 변경하여 중간 스크롤 이벤트 발생 방지
         requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                document.getElementById("step-info").scrollIntoView({
-                    behavior: "smooth",
-                    block: "end"
-                });
+            document.getElementById("step-info").scrollIntoView({
+                behavior: "instant",
+                block: "end"
             });
         });
     }
