@@ -13,7 +13,7 @@ import os
 model_path = os.path.join(os.path.dirname(__file__), "../models/model_v4.pth")
 def load_trained_model(model_path=model_path):
     # 모델 구조 (7클래스)
-    model = models.resnet18(pretrained=False)
+    model = models.resnet18(weights=None)  # pretrained=False → weights=None
     model.fc = nn.Linear(512, 7)  # 6 → 7
     # 학습시킨 가중치 업데이트
     model.load_state_dict(torch.load(model_path, map_location="cpu"))
@@ -147,7 +147,7 @@ class YOLOResNetPipeline:
     # 파이프라인 초기화
     def __init__(self):
         # YOLO 초기화
-        yolo_model_path = os.path.join(os.path.dirname(__file__), "../models/yolo11m.pt")
+        yolo_model_path = os.path.join(os.path.dirname(__file__), "../models/yolo11s.pt")
         self.yolo = YOLODetector(model_path=yolo_model_path)
         # ResNet 모델 초기화
         self.resnet = load_trained_model()
