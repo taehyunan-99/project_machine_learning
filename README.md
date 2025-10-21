@@ -95,3 +95,19 @@ python -m http.server 8080
 - [![Railway](https://img.shields.io/badge/Railway-0B0D0E?style=flat&logo=railway&logoColor=white)](https://railway.app/)
 - [![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat&logo=vercel&logoColor=white)](https://vercel.com/)
 - [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+
+## 👥 팀원 구성 및 역할
+
+| 이름 | 역할 | 담당 업무 | GitHub | Email |
+|:------:|:------:|:-----------:|:-------:|:-----:|
+| **안태현** | ML Engineer | 모델 학습 및 파이프라인 설계 | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/taehyunan-99) | rapael817@naver.com |
+| **김진선** | Backend Developer | FastAPI 백엔드 개발 | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/jjinsun) | wlsr5678@naver.com |
+| **이민정** | Frontend Developer | 웹 인터페이스 설계 및 개발 | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/naas0523) | naas4844@naver.com |
+
+## 📄 데이터 출처
+
+본 프로젝트는 AI Hub에서 제공하는 공개 데이터셋을 활용하여 개발되었습니다.
+
+- **재활용 폐기물 데이터셋**: [AI Hub - 재활용 폐기물 데이터](https://www.aihub.or.kr/aihubdata/data/view.do?searchKeyword=스티로폼&aihubDataSe=data&dataSetSn=140)
+  - 제공: 한국지능정보사회진흥원 (NIA)
+  - 용도: YOLO11s 및 ResNet18 모델 학습
